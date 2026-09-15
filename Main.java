@@ -1,23 +1,8 @@
 import java.util.Scanner;
-
-/**
- * NAVISENSE AI - Terminal Console Application
- * Smart India Hackathon 2026 (SIH26006)
- * Steel Authority of India Limited (SAIL)
- *
- * Simple, human-readable Java console code.
- *
- * How to run in terminal:
- *   javac Main.java
- *   java Main
- */
 public class Main {
-
-    // Exchange rate: 1 USD = 85.50 INR
     private static final double USD_TO_INR = 85.50;
 
     public static void main(String[] args) {
-        // Quick demo check if run with: java Main --demo
         for (String arg : args) {
             if (arg.equalsIgnoreCase("--demo") || arg.equalsIgnoreCase("-d")) {
                 runQuickDemo();
@@ -70,8 +55,6 @@ public class Main {
 
         scanner.close();
     }
-
-    // 1. Freight Prediction
     private static void predictFreight(Scanner scanner) {
         System.out.println("\n--- [1] FREIGHT RATE PREDICTION ---");
         System.out.print("Enter Origin Country (e.g., Australia, USA, Mozambique) [Australia]: ");
@@ -82,7 +65,7 @@ public class Main {
         String destination = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
         if (destination.isEmpty()) destination = "Paradip";
 
-        double currentSpotRate = 24.50; // default for Australia -> Paradip
+        double currentSpotRate = 24.50; 
         if (origin.equalsIgnoreCase("USA")) {
             currentSpotRate = 44.00;
         } else if (origin.equalsIgnoreCase("Mozambique")) {
@@ -101,8 +84,6 @@ public class Main {
         System.out.println("--------------------------------------------------");
         System.out.println("Insight: Spot freight rates are trending upward. Booking early is advised.");
     }
-
-    // 2. Port and Vessel Draft Compatibility Check
     private static void checkPortCompatibility(Scanner scanner) {
         System.out.println("\n--- [2] PORT DRAFT AND VESSEL COMPATIBILITY ---");
         System.out.println("Available Indian Ports:");
@@ -134,8 +115,6 @@ public class Main {
                     String.format("%.1f", (vesselDraft - portDraft)) + " meters! Risk of grounding.");
         }
     }
-
-    // 3. Voyage Cost and Demurrage Calculator
     private static void calculateVoyageCost(Scanner scanner) {
         System.out.println("\n--- [3] VOYAGE LOGISTICS COST CALCULATOR ---");
         System.out.print("Enter Cargo Quantity in tonnes [150000]: ");
@@ -146,15 +125,14 @@ public class Main {
         String rateInput = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
         double freightRate = rateInput.isEmpty() ? 24.50 : Double.parseDouble(rateInput);
 
-        // Standard logistics cost elements
         double oceanFreightUSD = quantity * freightRate;
-        double bunkerFuelUSD = 320000.0;     // Estimated fuel consumption for 16 voyage days
-        double portChargesUSD = quantity * 3.25; // Port tariffs and handling
-        double demurrageUSD = 45000.0;       // Queuing / laycan allowance
+        double bunkerFuelUSD = 320000.0;   
+        double portChargesUSD = quantity * 3.25;
+        double demurrageUSD = 45000.0;   
 
         double totalUSD = oceanFreightUSD + bunkerFuelUSD + portChargesUSD + demurrageUSD;
         double totalINR = totalUSD * USD_TO_INR;
-        double inrCrores = totalINR / 10000000.0; // 1 Crore = 10,000,000
+        double inrCrores = totalINR / 10000000.0; 
 
         System.out.println("\n==================================================");
         System.out.println("             VOYAGE COST BREAKDOWN                ");
@@ -170,7 +148,7 @@ public class Main {
         System.out.println("==================================================");
     }
 
-    // 4. Best Vessel and Contract Recommendation
+
     private static void recommendVesselAndStrategy(Scanner scanner) {
         System.out.println("\n--- [4] BEST VESSEL AND CONTRACT RECOMMENDATION ---");
         System.out.print("Enter Destination Port [Paradip]: ");
@@ -200,7 +178,6 @@ public class Main {
         System.out.println("   - Securing a Short-Term COA locks rates below projected spot spikes, saving Rs. 1.8 to 2.2 Crores.");
     }
 
-    // 5. Ask AI Assistant
     private static void askAssistant(Scanner scanner) {
         System.out.println("\n--- [5] AI PROCUREMENT COPILOT ---");
         System.out.println("Ask any question about SAIL vessel chartering, port limits, or booking timing.");
@@ -224,7 +201,6 @@ public class Main {
         }
     }
 
-    // 6. Quick Automated Demo
     private static void runQuickDemo() {
         System.out.println("\n==================================================");
         System.out.println("  RUNNING QUICK DEMO: SAIL 150,000t AUSTRALIA->PARADIP");
@@ -248,7 +224,6 @@ public class Main {
         System.out.println("\nDemo completed successfully!");
     }
 
-    // Helper: Port draft lookup
     private static double getPortDraft(String portName) {
         String p = portName.toLowerCase();
         if (p.contains("paradip")) return 16.5;
@@ -257,16 +232,16 @@ public class Main {
         if (p.contains("dhamra")) return 18.5;
         if (p.contains("gopalpur")) return 14.5;
         if (p.contains("haldia")) return 10.5;
-        return 15.0; // default fallback
+        return 15.0; 
     }
 
-    // Helper: Vessel draft lookup
+
     private static double getVesselDraft(String vesselName) {
         String v = vesselName.toLowerCase();
         if (v.contains("capesize")) return 18.0;
         if (v.contains("panamax")) return 14.5;
         if (v.contains("supramax")) return 12.8;
         if (v.contains("handysize")) return 10.2;
-        return 14.5; // default fallback
+        return 14.5;
     }
 }
