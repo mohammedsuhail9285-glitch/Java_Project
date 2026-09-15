@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk Monitor — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="text-micro text-teal">RISK INTELLIGENCE</span>
+            <span class="text-muted">• Multi-Dimensional Surveillance</span>
+          </div>
+          <h2 class="fw-bold text-dark mb-0">Maritime Risk &amp; Demurrage Monitor</h2>
+          <p class="text-muted small mb-0">Multi-dimensional risk scoring combining market volatility, port queue risk, weather channels, and laycan risks</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="topbar-date-pill">
+            Composite Score: <strong class="text-warning">54/100 (MEDIUM)</strong>
+          </span>
+          <a th:href="@{/alerts}" class="btn-watchfloor-outline">🚨 View Alerts</a>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="wf-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+            <div class="text-micro mb-2">COMPOSITE RISK GAUGE</div>
+            <div class="display-3 fw-bold text-warning my-2 font-mono">54<span class="fs-5 text-muted">/100</span></div>
+            <div class="my-2">
+              <span class="badge bg-warning bg-opacity-10 text-warning border px-3 py-1">MEDIUM RISK</span>
+            </div>
+            <p class="text-muted small mb-0 mt-2">
+              Weighted across volatility (25%), berth congestion (25%), vessel compatibility (15%), route distance (15%), forecast uncertainty (10%), and idle risk (10%).
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <div class="wf-card p-4 h-100">
+            <h4 class="wf-card-title mb-3">Multi-Factor Risk Breakdown</h4>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-dark fw-semibold">Freight Rate Volatility Risk (25% weight)</span>
+                <span class="text-warning font-mono fw-bold">61 / 100</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-warning" style="width: 61%;"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-dark fw-semibold">Port Berth Congestion &amp; Demurrage (25% weight)</span>
+                <span class="text-teal font-mono fw-bold">55 / 100</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-info" style="width: 55%;"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-dark fw-semibold">Route Maritime &amp; Geopolitical (15% weight)</span>
+                <span class="text-teal font-mono fw-bold">30 / 100</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" style="width: 30%;"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-dark fw-semibold">Vessel Draft &amp; Physical Berthing (15% weight)</span>
+                <span class="text-teal font-mono fw-bold">15 / 100</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" style="width: 15%;"></div>
+              </div>
+            </div>
+
+            <div class="mb-0">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-dark fw-semibold">Forecast Horizon Uncertainty (10% weight)</span>
+                <span class="text-muted font-mono fw-bold">40 / 100</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-secondary" style="width: 40%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-card p-4">
+        <h4 class="wf-card-title mb-3">Live Risk Alerts &amp; Prescriptive Mitigations</h4>
+        <div class="row g-3">
+          <div th:each="a : ${summary.recentAlerts}" class="col-md-6">
+            <div class="alert-item" th:classappend="${a.severity == 'DANGER' ? 'crit' : 'ok'}">
+              <div class="alert-item-header">
+                <span class="rec-pill mb-0" th:text="${a.category}">CATEGORY</span>
+                <span class="alert-item-time" th:text="${a.timestamp}">Time</span>
+              </div>
+              <h5 class="alert-item-title my-1" th:text="${a.title}">Title</h5>
+              <p class="alert-item-desc" th:text="${a.message}">Message</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

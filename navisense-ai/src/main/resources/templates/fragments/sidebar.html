@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar" class="watchfloor-sidebar" id="watchfloorSidebar">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <a th:href="@{/dashboard}" class="brand-logo-wrap">
+      <div class="brand-icon-box">N</div>
+      <span class="brand-title">NAVISENSE AI</span>
+    </a>
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse Sidebar" onclick="toggleSidebar()">
+      <span>‹</span>
+    </button>
+  </div>
+
+  <!-- Primary Watch Navigation -->
+  <nav class="sidebar-nav">
+    <a th:href="@{/dashboard}" class="sidebar-link" th:classappend="${activeNav == 'dashboard' or activeNav == 'home' ? 'active' : ''}">
+      <span class="sidebar-link-num">01</span>
+      <span class="sidebar-link-text">Watchfloor</span>
+      <span th:if="${activeNav == 'dashboard' or activeNav == 'home'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <a th:href="@{/charter}" class="sidebar-link" th:classappend="${activeNav == 'charter' ? 'active' : ''}">
+      <span class="sidebar-link-num">02</span>
+      <span class="sidebar-link-text">Charter Analysis</span>
+      <span th:if="${activeNav == 'charter'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <a th:href="@{/forecast}" class="sidebar-link" th:classappend="${activeNav == 'forecast' ? 'active' : ''}">
+      <span class="sidebar-link-num">03</span>
+      <span class="sidebar-link-text">Freight Forecast</span>
+      <span th:if="${activeNav == 'forecast'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <a th:href="@{/ports}" class="sidebar-link" th:classappend="${activeNav == 'ports' ? 'active' : ''}">
+      <span class="sidebar-link-num">04</span>
+      <span class="sidebar-link-text">Port Risk</span>
+      <span th:if="${activeNav == 'ports'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <a th:href="@{/routes}" class="sidebar-link" th:classappend="${activeNav == 'routes' ? 'active' : ''}">
+      <span class="sidebar-link-num">05</span>
+      <span class="sidebar-link-text">Route Corridors</span>
+      <span th:if="${activeNav == 'routes'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <a th:href="@{/history}" class="sidebar-link" th:classappend="${activeNav == 'history' ? 'active' : ''}">
+      <span class="sidebar-link-num">06</span>
+      <span class="sidebar-link-text">Decision History</span>
+      <span th:if="${activeNav == 'history'}" class="sidebar-link-dot"></span>
+    </a>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Operations &amp; Tools</div>
+
+    <a th:href="@{/simulation}" class="sidebar-link" th:classappend="${activeNav == 'simulation' ? 'active' : ''}">
+      <span class="sidebar-link-num">07</span>
+      <span class="sidebar-link-text">What-If Simulator</span>
+    </a>
+
+    <a th:href="@{/vessels}" class="sidebar-link" th:classappend="${activeNav == 'vessels' ? 'active' : ''}">
+      <span class="sidebar-link-num">08</span>
+      <span class="sidebar-link-text">Vessel Optimizer</span>
+    </a>
+
+    <a th:href="@{/risk}" class="sidebar-link" th:classappend="${activeNav == 'risk' ? 'active' : ''}">
+      <span class="sidebar-link-num">09</span>
+      <span class="sidebar-link-text">Risk &amp; Demurrage</span>
+    </a>
+
+    <a th:href="@{/copilot}" class="sidebar-link" th:classappend="${activeNav == 'copilot' ? 'active' : ''}">
+      <span class="sidebar-link-num">10</span>
+      <span class="sidebar-link-text">NaviSense Copilot</span>
+    </a>
+
+    <a th:href="@{/data-lab}" class="sidebar-link" th:classappend="${activeNav == 'datalab' ? 'active' : ''}">
+      <span class="sidebar-link-num">11</span>
+      <span class="sidebar-link-text">Data Lab</span>
+    </a>
+
+    <a th:href="@{/demo}" class="sidebar-link" th:classappend="${activeNav == 'demo' ? 'active' : ''}">
+      <span class="sidebar-link-num">12</span>
+      <span class="sidebar-link-text">Demo Scenarios</span>
+    </a>
+  </nav>
+
+  <!-- Sidebar Footer User Card -->
+  <div class="sidebar-footer">
+    <div class="sidebar-section-label mb-2 px-0">ON WATCH</div>
+    <div class="user-watch-badge">
+      <div class="user-avatar">MS</div>
+      <div>
+        <div class="user-name">M. Suhail</div>
+        <div class="user-role">Watch Lead</div>
+      </div>
+    </div>
+  </div>
+</aside>
+</body>
+</html>

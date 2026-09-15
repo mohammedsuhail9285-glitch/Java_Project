@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'NaviSense Executive Report — ' + ${decision.fingerprint}">NaviSense Executive Report</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #132228; background: #fff; }
+    .report-header { border-bottom: 2px solid #0d7e77; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .badge-decision { font-size: 1.35rem; padding: 0.4rem 1.5rem; font-weight: 800; border-radius: 6px; background-color: #0d7e77; color: #ffffff; }
+    .table-report th { background-color: #f4f7f6; color: #132228; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+    .table-report td { font-size: 0.88rem; }
+    .text-teal { color: #0d7e77 !important; }
+    .btn-teal { background-color: #0d7e77; color: #fff; border: none; }
+    .btn-teal:hover { background-color: #0a6660; color: #fff; }
+    @media print {
+      .no-print { display: none !important; }
+      body { margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body class="p-4">
+<div class="container" style="max-width: 900px;">
+
+  <!-- Print Actions Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <a href="javascript:window.history.back()" class="btn btn-outline-secondary btn-sm">⬅ Return to Application</a>
+    <button onclick="window.print()" class="btn btn-teal btn-sm fw-bold">🖨️ Print / Save as PDF</button>
+  </div>
+
+  <!-- Report Header -->
+  <div class="report-header d-flex justify-content-between align-items-end">
+    <div>
+      <h2 class="fw-bold text-teal mb-1">NAVISENSE AI — EXECUTIVE CHARTER REPORT</h2>
+      <div class="text-secondary small">Autonomous Maritime Freight Forecasting &amp; Vessel Charter Intelligence Platform</div>
+      <div class="text-muted small">Target Entity: <strong>Steel Authority of India Limited (SAIL)</strong> | SIH26006</div>
+    </div>
+    <div class="text-end">
+      <div class="small text-muted">Fingerprint:</div>
+      <div class="fw-bold font-monospace text-teal" th:text="${decision.fingerprint}">NAV-26006-20260911-001</div>
+    </div>
+  </div>
+
+  <!-- Executive Verdict Box -->
+  <div class="p-4 border rounded bg-light mb-4 text-center">
+    <div class="text-uppercase text-secondary fw-bold small mb-1">PRIMARY PROCUREMENT VERDICT</div>
+    <div class="badge-decision mb-2 d-inline-block" th:text="${decision.primaryDecision}">BOOK NOW</div>
+    <h4 class="fw-bold mb-1" th:text="${decision.routeDescription}">Australia → Paradip</h4>
+    <p class="mb-0 text-muted" th:text="'Recommended Fleet: ' + ${decision.recommendedVessel} + ' | Strategy: ' + ${decision.recommendedContract}">
+      Panamax | Short-Term COA
+    </p>
+  </div>
+
+  <!-- Rationale & Explainability -->
+  <div class="mb-4">
+    <h5 class="fw-bold border-bottom pb-1 text-teal">1. Strategic Rationale &amp; Why This Recommendation</h5>
+    <p class="text-secondary" style="line-height: 1.6;" th:text="${decision.rationale}">Rationale paragraph</p>
+    <div class="row g-2">
+      <div class="col-6">
+        <div class="fw-bold small text-success">Positive Drivers:</div>
+        <ul class="small text-muted ps-3 mb-0">
+          <li th:each="f : ${decision.positiveFactors}" th:text="${f.factor} + ' (+' + ${f.contribution} + '): ' + ${f.explanation}">Driver</li>
+        </ul>
+      </div>
+      <div class="col-6">
+        <div class="fw-bold small text-danger">Risk / Cost Offsets:</div>
+        <ul class="small text-muted ps-3 mb-0">
+          <li th:each="f : ${decision.negativeFactors}" th:text="${f.factor} + ' (' + ${f.contribution} + '): ' + ${f.explanation}">Driver</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics Table -->
+  <div class="mb-4">
+    <h5 class="fw-bold border-bottom pb-1 text-teal">2. Financial &amp; Operational Summary</h5>
+    <table class="table table-bordered table-report">
+      <tbody>
+        <tr>
+          <th style="width: 25%;">Current Spot Freight</th>
+          <td th:text="'$' + ${#numbers.formatDecimal(decision.currentRateUsd, 1, 2)} + ' / tonne'">$24.50</td>
+          <th style="width: 25%;">14-Day Forecast Rate</th>
+          <td th:text="'$' + ${#numbers.formatDecimal(decision.forecastRateUsd, 1, 2)} + ' / tonne'">$25.10</td>
+        </tr>
+        <tr>
+          <th>Total Expected Outlay</th>
+          <td class="fw-bold text-dark" th:text="${decision.totalCostInrFormatted}">₹38.90 Cr</td>
+          <th>Estimated Cost Savings</th>
+          <td class="fw-bold text-teal" th:text="${decision.potentialSavingsInrFormatted} + ' (' + ${decision.savingsPercentage} + '%)'">₹1.84 Cr</td>
+        </tr>
+        <tr>
+          <th>Best Charter Window</th>
+          <td th:text="${decision.bestCharterWindow}">15 Sep – 20 Sep 2026</td>
+          <th>Decision Confidence</th>
+          <td th:text="${decision.decisionConfidence} + '% (Risk: ' + ${decision.riskLevel} + ')'">88%</td>
+        </tr>
+        <tr>
+          <th>Voyages Required</th>
+          <td th:text="${decision.voyageCount} + ' Voyages'">2</td>
+          <th>Capacity Utilization</th>
+          <td th:text="${decision.capacityUtilizationPct} + '%'">95.2%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vessel Matrix -->
+  <div class="mb-4">
+    <h5 class="fw-bold border-bottom pb-1 text-teal">3. Vessel Suitability &amp; Compatibility Matrix</h5>
+    <table class="table table-sm table-bordered table-report">
+      <thead>
+        <tr>
+          <th>Vessel</th>
+          <th>Physical Status</th>
+          <th>Suitability</th>
+          <th>Voyages</th>
+          <th>Utilization</th>
+          <th>Total Outlay (INR)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="v : ${decision.vesselRankings}">
+          <td class="fw-bold" th:text="${v.vesselName}">Panamax</td>
+          <td>
+            <span th:if="${v.compatible}" class="badge bg-success">COMPATIBLE</span>
+            <span th:unless="${v.compatible}" class="badge bg-danger" th:text="'REJECTED: ' + ${v.rejectionReason}">REJECTED</span>
+          </td>
+          <td th:text="${v.score} + '/100'">92/100</td>
+          <td th:text="${v.voyagesRequired}">2</td>
+          <td th:text="${#numbers.formatDecimal(v.capacityUtilization, 1, 1)} + '%'">95.2%</td>
+          <td class="fw-bold" th:text="${v.totalCostInrFormatted}">₹38.90 Cr</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Contract Options -->
+  <div class="mb-4">
+    <h5 class="fw-bold border-bottom pb-1 text-teal">4. Contract Strategy Evaluation</h5>
+    <table class="table table-sm table-bordered table-report">
+      <thead>
+        <tr>
+          <th>Strategy</th>
+          <th>Expected Outlay</th>
+          <th>Potential Saving</th>
+          <th>Risk</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="c : ${decision.contractOptions}">
+          <td class="fw-bold" th:text="${c.strategyName}">Strategy</td>
+          <td th:text="${c.expectedCostInrFormatted}">₹38.90 Cr</td>
+          <td class="text-teal fw-bold" th:text="${c.potentialSavingInrFormatted}">₹1.84 Cr</td>
+          <td th:text="${c.riskLevel}">MEDIUM</td>
+          <td>
+            <span th:if="${c.recommended}" class="badge bg-success">RECOMMENDED</span>
+            <span th:unless="${c.recommended}" class="badge bg-light text-dark border">ALTERNATIVE</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Transparency Calculation Audit -->
+  <div class="mb-4">
+    <h5 class="fw-bold border-bottom pb-1 text-teal">5. Mathematical Calculation Transparency</h5>
+    <div class="row g-2">
+      <div class="col-6" th:each="entry : ${decision.calculationBreakdown}">
+        <div class="d-flex justify-content-between border-bottom py-1 small">
+          <span class="text-muted" th:text="${entry.key}">key</span>
+          <strong th:text="${entry.value}">value</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer Footer -->
+  <div class="border-top pt-3 text-muted small mt-5">
+    <strong>DATA DISCLAIMER:</strong> This report is generated autonomously by NaviSense AI (SIH26006 prototype) using deterministic representative freight observations, port constraints, and fuel proxies. Production operational deployment requires validated live commercial Baltic Exchange feeds, official port authority tariffs, and SAIL internal ERP procurement contracts.
+  </div>
+
+</div>
+</body>
+</html>

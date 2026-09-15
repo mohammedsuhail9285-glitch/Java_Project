@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+
+      <div class="wf-card p-4 mb-4">
+        <span class="rec-pill mb-2">SMART INDIA HACKATHON 2026 — SIH26006</span>
+        <h2 class="fw-bold text-dark mb-2">About NaviSense AI</h2>
+        <p class="text-muted fs-6 mb-0">
+          Intelligent Freight Forecasting Model for Optimized Vessel Chartering and Bulk Cargo Procurement from Overseas to East Coast of India.
+        </p>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="wf-card p-4 h-100">
+            <h4 class="wf-card-title mb-3">Target Stakeholders &amp; End-Users</h4>
+            <ul class="list-unstyled text-muted small" style="line-height: 2;">
+              <li><strong class="text-dark">Organization:</strong> Ministry of Steel, Government of India</li>
+              <li><strong class="text-dark">Department:</strong> Steel Authority of India Limited (SAIL)</li>
+              <li><strong class="text-dark">Primary End-Users:</strong> Logistics Directors, Procurement Heads, Chartering Officers</li>
+              <li><strong class="text-dark">Import Commodities:</strong> Low-Vol Hard Coking Coal, PCI Coal, Thermal Coal, Limestone</li>
+              <li><strong class="text-dark">Overseas Basins:</strong> Australia (Hay Point, Gladstone), USA, Mozambique, Russia, Indonesia</li>
+              <li><strong class="text-dark">Discharge Hubs:</strong> Paradip, Visakhapatnam, Gangavaram, Dhamra, Gopalpur, Haldia</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="wf-card p-4 h-100">
+            <h4 class="wf-card-title mb-3">Enterprise Architectural Principles</h4>
+            <ul class="list-unstyled text-muted small" style="line-height: 2;">
+              <li><strong class="text-teal">100% Offline Capable:</strong> Zero external paid API dependencies or commercial API keys.</li>
+              <li><strong class="text-teal">Pure Java 21 Stack:</strong> No fragile external Python runtime bridges.</li>
+              <li><strong class="text-teal">Mathematical Transparency:</strong> Deterministic ensemble forecasting with verifiable audit trails.</li>
+              <li><strong class="text-teal">Digital Port Enforcements:</strong> Strict draft, beam, and LOA checks prevent berthing casualties.</li>
+              <li><strong class="text-teal">Full Traceability:</strong> Every analysis is fingerprinted (NAV-26006-...) and logged in H2.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-card p-4">
+        <h4 class="wf-card-title mb-3">System Architecture Pipeline</h4>
+        <div class="p-3 bg-light rounded border font-mono text-dark small" style="line-height: 1.8;">
+          [Browser Web Client / REST API Consumer]<br>
+          &nbsp;&nbsp;│<br>
+          &nbsp;&nbsp;▼<br>
+          [Spring MVC Controllers: PageController &amp; CharterApiController]<br>
+          &nbsp;&nbsp;│<br>
+          &nbsp;&nbsp;▼<br>
+          [CharterIntelligenceService (Central Orchestrator)]<br>
+          &nbsp;&nbsp;├─► [FreightForecastService (35% ExpSmooth + 30% Trend + 25% WMA + 10% Seasonality)]<br>
+          &nbsp;&nbsp;├─► [PortCompatibilityService (Physical Draft &lt;= MaxDraft, Beam &lt;= MaxBeam, LOA &lt;= MaxLOA)]<br>
+          &nbsp;&nbsp;├─► [VesselOptimizationService (Deadweight capacity utilization &amp; 4-class ranking)]<br>
+          &nbsp;&nbsp;├─► [VoyageCostService (Multi-voyage logistics cost calculation in USD &amp; INR ₹ Cr)]<br>
+          &nbsp;&nbsp;├─► [RiskAssessmentService (Multi-factor volatility, congestion &amp; route scoring 0-100)]<br>
+          &nbsp;&nbsp;├─► [ContractStrategyService (Spot vs Short-Term COA vs Medium-Term COA vs Hybrid)]<br>
+          &nbsp;&nbsp;└─► [IdleTimeOptimizationService (Alternative destination port evaluation)]<br>
+          &nbsp;&nbsp;│<br>
+          &nbsp;&nbsp;▼<br>
+          [Spring Data JPA Repositories / Hibernate] ➔ [H2 Embedded Relational Database]
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

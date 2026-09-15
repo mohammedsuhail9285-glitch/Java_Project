@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charter Analysis — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+      <div class="row justify-content-center">
+        <div class="col-xl-11">
+
+          <!-- Header & Breadcrumbs -->
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="text-micro">PROCUREMENT INTELLIGENCE</span>
+                <span class="text-muted">• Deterministic Engine</span>
+              </div>
+              <h2 class="fw-bold text-dark mb-0">Charter Analysis &amp; Vessel Evaluation</h2>
+              <p class="text-muted small mb-0">Evaluate forward freight forecasts, verify physical port draft limits, optimize vessel deadweight, and calculate contract savings</p>
+            </div>
+            <a th:href="@{/history}" class="btn-watchfloor-outline">
+              Decision History
+            </a>
+          </div>
+
+          <!-- Pre-Configured Presets -->
+          <div class="wf-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h4 class="wf-card-title mb-0">⚡ Pre-Configured SIH Evaluation Scenarios</h4>
+                <div class="text-muted small">Select any preset below to populate operational parameters and commercial hurdles</div>
+              </div>
+              <span class="text-micro">4 Deterministic Presets</span>
+            </div>
+
+            <div class="row g-3">
+              <!-- Scenario 1 -->
+              <div class="col-md-6 col-xl-3">
+                <div class="scenario-preset-card p-3 border rounded" onclick="loadDemoScenario(1)">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="rec-pill mb-0">Scenario 1</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Budget Fit</span>
+                  </div>
+                  <div class="fw-bold text-dark mt-2">Australia ➔ Paradip</div>
+                  <div class="small text-muted mb-2">150,000 t • Coking Coal</div>
+                  <div class="small text-teal fw-bold">Budget: ₹50.0 Cr | Rate: $26/t</div>
+                  <div class="text-micro mt-1">Capesize (18.2m) rejected ➔ Panamax</div>
+                </div>
+              </div>
+
+              <!-- Scenario 2 -->
+              <div class="col-md-6 col-xl-3">
+                <div class="scenario-preset-card p-3 border rounded" onclick="loadDemoScenario(2)">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="rec-pill mb-0">Scenario 2</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Hybrid Fit</span>
+                  </div>
+                  <div class="fw-bold text-dark mt-2">Mozambique ➔ Dhamra</div>
+                  <div class="small text-muted mb-2">80,000 t • Coking Coal</div>
+                  <div class="small text-teal fw-bold">Budget: ₹28.0 Cr | Rate: $27/t</div>
+                  <div class="text-micro mt-1">Mid-sized parcel ➔ Supramax Fit</div>
+                </div>
+              </div>
+
+              <!-- Scenario 3 -->
+              <div class="col-md-6 col-xl-3">
+                <div class="scenario-preset-card p-3 border rounded" onclick="loadDemoScenario(3)">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="rec-pill mb-0">Scenario 3</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Shallow</span>
+                  </div>
+                  <div class="fw-bold text-dark mt-2">Indonesia ➔ Haldia</div>
+                  <div class="small text-muted mb-2">55,000 t • Thermal Coal</div>
+                  <div class="small text-teal fw-bold">Budget: ₹18.0 Cr | Rate: $29/t</div>
+                  <div class="text-micro mt-1">Strict 10.5m draft ➔ Handysize</div>
+                </div>
+              </div>
+
+              <!-- Scenario 4 -->
+              <div class="col-md-6 col-xl-3">
+                <div class="scenario-preset-card p-3 border rounded" onclick="loadDemoScenario(4)">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="rec-pill mb-0">Scenario 4</span>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Deepwater</span>
+                  </div>
+                  <div class="fw-bold text-dark mt-2">USA ➔ Visakhapatnam</div>
+                  <div class="small text-muted mb-2">180,000 t • Hard Coking Coal</div>
+                  <div class="small text-teal fw-bold">Budget: ₹75.0 Cr | Rate: $50/t</div>
+                  <div class="text-micro mt-1">Deepwater 18.5m draft ➔ Capesize</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="scenarioAlert" class="alert alert-info py-2 px-3 mt-3 mb-0 small d-none"></div>
+          </div>
+
+          <!-- Main Input Form Card -->
+          <div class="wf-card p-4">
+            <form th:action="@{/charter/analyze}" th:object="${charterRequest}" method="post">
+
+              <!-- Errors -->
+              <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger py-2 mb-4 small">
+                <strong>Please correct the following errors:</strong>
+                <ul class="mb-0 ps-3">
+                  <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Validation error</li>
+                </ul>
+              </div>
+
+              <!-- STEP 1: Cargo Specifications -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                  <span class="sidebar-link-num text-teal fw-bold fs-6">01</span>
+                  <h4 class="wf-card-title mb-0">Cargo &amp; Parcel Specifications</h4>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="cargoType" class="form-label-wf">Cargo Type</label>
+                    <input type="text" class="form-control-wf" id="cargoType" th:field="*{cargoType}"
+                           placeholder="e.g. Coking Coal, Iron Ore" required>
+                    <div class="text-muted small mt-1">Bulk commodity to be transported for blast furnace operations</div>
+                    <div th:if="${#fields.hasErrors('cargoType')}" class="text-coral small mt-1" th:errors="*{cargoType}"></div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="quantityTonnes" class="form-label-wf">Cargo Parcel Quantity (Tonnes)</label>
+                    <input type="number" step="1000" class="form-control-wf" id="quantityTonnes"
+                           th:field="*{quantityTonnes}" placeholder="e.g. 150000" required>
+                    <div class="text-muted small mt-1">Total required procurement volume (NaviSense optimizes voyage splits)</div>
+                    <div th:if="${#fields.hasErrors('quantityTonnes')}" class="text-coral small mt-1" th:errors="*{quantityTonnes}"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 2: Trade Corridor & Physical Ports -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                  <span class="sidebar-link-num text-teal fw-bold fs-6">02</span>
+                  <h4 class="wf-card-title mb-0">Maritime Trade Corridor &amp; Port Boundaries</h4>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="originCountry" class="form-label-wf">Overseas Origin Country</label>
+                    <select class="form-select-wf" id="originCountry" th:field="*{originCountry}" required>
+                      <option value="Australia">Australia</option>
+                      <option value="United States">United States</option>
+                      <option value="Mozambique">Mozambique</option>
+                      <option value="Russia">Russia</option>
+                      <option value="Indonesia">Indonesia</option>
+                    </select>
+                    <div class="text-muted small mt-1">Major sourcing basin for raw material imports</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="loadingPort" class="form-label-wf">Overseas Loading Port</label>
+                    <select class="form-select-wf" id="loadingPort" th:field="*{loadingPort}" required>
+                      <option th:each="p : ${loadingPorts}" th:value="${p.name}" th:text="${p.name} + ' (' + ${p.country} + ')'"></option>
+                    </select>
+                    <div class="text-muted small mt-1">Terminal where vessel receives bulk cargo</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="destinationPort" class="form-label-wf">Indian Destination Port (East Coast)</label>
+                    <select class="form-select-wf" id="destinationPort" th:field="*{destinationPort}" required>
+                      <option th:each="p : ${destinationPorts}" th:value="${p.name}" th:text="${p.name} + ' (Max Draft ' + ${p.maximumDraft} + 'm)'"></option>
+                    </select>
+                    <div class="text-muted small mt-1">Discharge port with strict draft and LOA constraints</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 3: Laycan Schedule & Fleet Preference -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                  <span class="sidebar-link-num text-teal fw-bold fs-6">03</span>
+                  <h4 class="wf-card-title mb-0">Laycan Schedule &amp; Fleet Preference</h4>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="shipmentDate" class="form-label-wf">Target Laycan Date</label>
+                    <input type="date" class="form-control-wf" id="shipmentDate" th:field="*{shipmentDate}" required>
+                    <div class="text-muted small mt-1">Target arrival window at overseas terminal</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="contractDurationMonths" class="form-label-wf">Target Horizon (Months)</label>
+                    <input type="number" min="1" max="36" class="form-control-wf" id="contractDurationMonths"
+                           th:field="*{contractDurationMonths}" required>
+                    <div class="text-muted small mt-1">Evaluation horizon for multi-voyage contracts</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="preferredVessel" class="form-label-wf">Vessel Fleet Class</label>
+                    <select class="form-select-wf" id="preferredVessel" th:field="*{preferredVessel}">
+                      <option value="">-- Let NaviSense Auto-Optimize Fleet --</option>
+                      <option th:each="v : ${vesselTypes}" th:value="${v.name}" th:text="${v.name} + ' (~' + ${#numbers.formatDecimal(v.typicalCapacity, 1, 0)} + 't)'"></option>
+                    </select>
+                    <div class="text-muted small mt-1">Leave blank for automatic deadweight ranking</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 4: Commercial Hurdles & Budget Parameters -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                  <span class="sidebar-link-num text-teal fw-bold fs-6">04</span>
+                  <h4 class="wf-card-title mb-0">Commercial Hurdles &amp; Financial Governance</h4>
+                </div>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="budgetInr" class="form-label-wf">Target Procurement Budget (INR)</label>
+                    <input type="number" step="1000000" class="form-control-wf" id="budgetInr"
+                           th:field="*{budgetInr}" placeholder="e.g. 500000000 (₹50.0 Cr)">
+                    <div class="text-muted small mt-1">Optional internal ceiling to evaluate budget surplus variance</div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="expectedFreightRateUsd" class="form-label-wf">Internal Hurdle Freight Rate ($/t)</label>
+                    <input type="number" step="0.25" class="form-control-wf" id="expectedFreightRateUsd"
+                           th:field="*{expectedFreightRateUsd}" placeholder="e.g. 26.00">
+                    <div class="text-muted small mt-1">Optional desk benchmark to evaluate rate delta vs forecast</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center pt-3 border-top flex-wrap gap-3">
+                <span class="text-muted small">
+                  🔒 Verifies draft boundaries, forecasts forward rates, computes delivered costs, and logs decision fingerprint
+                </span>
+                <button type="submit" class="btn-watchfloor-primary px-4 py-2 fs-6">
+                  ⚡ Analyze Charter
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

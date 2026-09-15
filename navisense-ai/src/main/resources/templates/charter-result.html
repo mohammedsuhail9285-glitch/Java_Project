@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charter Decision — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Left Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+
+      <!-- Header & Traceability Bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <span class="text-micro">DECISION FINGERPRINT:</span>
+          <span class="fw-bold text-teal font-mono ms-1" th:text="${decision.fingerprint}">NAV-26006-20260911-001</span>
+          <button class="btn-watchfloor-outline btn-sm py-0 px-2 ms-2 small"
+                  th:attr="onclick='copyFingerprint(\'' + ${decision.fingerprint} + '\')'">Copy</button>
+        </div>
+        <div class="d-flex gap-2">
+          <a th:href="@{'/charter/report/' + ${decision.fingerprint}}" target="_blank" class="btn-watchfloor-outline btn-sm">
+            🖨️ Printable PDF
+          </a>
+          <a th:href="@{/charter}" class="btn-watchfloor-primary btn-sm">
+            ⚡ New Analysis
+          </a>
+        </div>
+      </div>
+
+      <!-- Recommendation Hero Banner -->
+      <div class="rec-card-hero mb-4 text-center p-4">
+        <div class="rec-pill mb-2">
+          <span class="rec-pill-dot"></span>
+          DECISION VERDICT
+        </div>
+        <div class="display-6 fw-bold text-teal my-2" th:text="${decision.primaryDecision}">
+          BOOK NOW
+        </div>
+        <h3 class="fw-bold text-dark mb-1" th:text="${decision.routeDescription}">
+          Australia (Hay Point) → India (Paradip)
+        </h3>
+        <p class="text-muted small mb-0" th:text="'Recommended Fleet: ' + ${decision.recommendedVessel} + ' | Strategy: ' + ${decision.recommendedContract}">
+          Recommended Fleet: Panamax | Strategy: Short-Term Multi-Voyage Contract
+        </p>
+      </div>
+
+      <!-- Core Metric Highlights Grid -->
+      <div class="kpi-row-card mb-4">
+        <div class="kpi-column">
+          <div class="kpi-label">CURRENT SPOT FREIGHT</div>
+          <div class="kpi-number text-dark" th:text="'$' + ${#numbers.formatDecimal(decision.currentRateUsd, 1, 2)}">$24.50</div>
+          <div class="text-muted small mt-1">Loading Basin Base Rate</div>
+        </div>
+        <div class="kpi-column">
+          <div class="kpi-label">14-DAY FORECAST FREIGHT</div>
+          <div class="kpi-number text-teal" th:text="'$' + ${#numbers.formatDecimal(decision.forecastRateUsd, 1, 2)}">$25.10</div>
+          <div class="kpi-delta neg">Upward pressure</div>
+        </div>
+        <div class="kpi-column">
+          <div class="kpi-label">POTENTIAL SAVINGS</div>
+          <div class="kpi-number text-teal" th:text="${decision.potentialSavingsInrFormatted}">₹1.84 Cr</div>
+          <div class="kpi-delta pos" th:text="${#numbers.formatDecimal(decision.savingsPercentage, 1, 1)} + '% vs spot'">4.5% vs spot</div>
+        </div>
+        <div class="kpi-column">
+          <div class="kpi-label">CONFIDENCE &amp; RISK</div>
+          <div class="kpi-number" th:text="${decision.decisionConfidence} + '%'">88%</div>
+          <div class="kpi-delta" th:classappend="${decision.riskLevel == 'LOW' ? 'pos' : 'neg'}" th:text="'Risk: ' + ${decision.riskLevel}">Risk: LOW</div>
+        </div>
+      </div>
+
+      <!-- Budget Compliance Banner -->
+      <div th:if="${decision.budgetStatus != 'NOT_SPECIFIED'}" class="wf-card p-3 mb-4"
+           th:style="${decision.budgetStatus == 'WITHIN_BUDGET' ? 'border-left: 4px solid #16a34a;' : 'border-left: 4px solid #e05d44;'}">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="fs-4" th:text="${decision.budgetStatus == 'WITHIN_BUDGET' ? '🎯' : '⚠️'}">🎯</span>
+            <div>
+              <strong class="text-dark">Procurement Budget Compliance:</strong>
+              <span th:if="${decision.budgetStatus == 'WITHIN_BUDGET'}" class="text-teal fw-bold ms-1">
+                Compliant — Spend is within target allocation by <span th:text="${decision.budgetVarianceInrFormatted}">₹1.10 Cr</span>.
+              </span>
+              <span th:if="${decision.budgetStatus == 'EXCEEDS_BUDGET'}" class="text-coral fw-bold ms-1">
+                Overrun — Spend exceeds target allocation by <span th:text="${decision.budgetVarianceInrFormatted}">₹0.90 Cr</span>.
+              </span>
+            </div>
+          </div>
+          <div class="d-flex gap-3 text-muted small">
+            <span>Budget: <strong class="text-dark" th:text="${decision.budgetInrFormatted}">₹40.00 Cr</strong></span>
+            <span>Spend: <strong class="text-dark" th:text="${decision.totalCostInrFormatted}">₹38.90 Cr</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rationale Card -->
+      <div class="wf-card p-4 mb-4" style="border-left: 4px solid var(--teal-primary);">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="fs-5">💡</span>
+          <h4 class="wf-card-title mb-0">Explainable Recommendation Rationale</h4>
+          <span class="rec-pill ms-auto mb-0">Attribution Analysis</span>
+        </div>
+        <p class="text-dark mb-3" style="line-height: 1.6;" th:text="${decision.rationale}">
+          Dynamic explanation text generated by the charter intelligence service.
+        </p>
+
+        <div class="row g-3 pt-2 border-top">
+          <div class="col-md-6">
+            <div class="text-micro text-teal mb-2">POSITIVE DRIVERS</div>
+            <div th:each="f : ${decision.positiveFactors}" class="d-flex justify-content-between align-items-center py-1 border-bottom small">
+              <span class="text-dark" th:text="${f.factor}">Factor</span>
+              <span class="badge bg-success bg-opacity-10 text-success fw-bold" th:text="'+' + ${f.contribution}">+28</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-micro text-coral mb-2">RISK OFFSETS</div>
+            <div th:each="f : ${decision.negativeFactors}" class="d-flex justify-content-between align-items-center py-1 border-bottom small">
+              <span class="text-dark" th:text="${f.factor}">Factor</span>
+              <span class="badge bg-danger bg-opacity-10 text-danger fw-bold" th:text="${f.contribution}">-12</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vessel Class Evaluation Matrix -->
+      <div class="wf-card mb-4">
+        <div class="wf-card-header">
+          <h4 class="wf-card-title mb-0">Vessel Class Physical Constraint &amp; Optimization Matrix</h4>
+          <span class="text-micro">Draft &amp; LOA Boundary Checks</span>
+        </div>
+        <div class="table-responsive">
+          <table class="wf-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Vessel Class</th>
+                <th>Status</th>
+                <th>Suitability Score</th>
+                <th>Voyages</th>
+                <th>Utilization</th>
+                <th>Est. Rate /t</th>
+                <th>Total Cost</th>
+                <th>Relative CO₂</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="v : ${decision.vesselRankings}">
+                <td class="fw-bold" th:text="${v.compatible ? '#' + v.rank : '—'}">#1</td>
+                <td class="fw-bold text-dark" th:text="${v.vesselName}">Panamax</td>
+                <td>
+                  <span th:if="${v.compatible}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">COMPATIBLE</span>
+                  <span th:unless="${v.compatible}" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" th:title="${v.rejectionReason}">REJECTED</span>
+                  <div th:if="${!v.compatible}" class="text-coral small mt-1" th:text="${v.rejectionReason}">Draft limit</div>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="font-mono fw-bold text-teal" th:text="${v.score}">92</span>
+                    <span class="text-muted small">/100</span>
+                  </div>
+                </td>
+                <td th:text="${v.voyagesRequired}">2</td>
+                <td th:text="${#numbers.formatDecimal(v.capacityUtilization, 1, 1)} + '%'">95.2%</td>
+                <td class="font-mono text-teal" th:text="'$' + ${#numbers.formatDecimal(v.estimatedCostPerTonneUsd, 1, 2)}">$24.50</td>
+                <td class="fw-bold text-dark" th:text="${v.totalCostInrFormatted}">₹38.90 Cr</td>
+                <td class="text-muted small" th:text="${v.relativeCo2Index} + ' idx'">68.0 idx</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Contract Strategy Comparison Table -->
+      <div class="wf-card mb-4">
+        <div class="wf-card-header">
+          <h4 class="wf-card-title mb-0">Charter Contract Strategy Evaluation</h4>
+          <span class="text-micro">Short-Term COA vs Spot vs Hybrid</span>
+        </div>
+        <div class="table-responsive">
+          <table class="wf-table">
+            <thead>
+              <tr>
+                <th>Contract Strategy</th>
+                <th>Expected Outlay</th>
+                <th>Potential Saving</th>
+                <th>Risk Level</th>
+                <th>Volatility Exposure</th>
+                <th>Suitability</th>
+                <th>Decision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="c : ${decision.contractOptions}">
+                <td>
+                  <span class="fw-bold text-dark" th:text="${c.strategyName}">Short-Term COA</span>
+                  <div class="text-muted small" th:text="${c.description}">Description</div>
+                </td>
+                <td class="fw-bold text-dark" th:text="${c.expectedCostInrFormatted}">₹38.90 Cr</td>
+                <td class="fw-bold text-teal" th:text="${c.potentialSavingInrFormatted}">₹1.84 Cr</td>
+                <td><span class="badge bg-light text-muted border" th:text="${c.riskLevel}">MEDIUM</span></td>
+                <td class="small text-muted" th:text="${c.volatilityExposure}">MODERATE</td>
+                <td>
+                  <span class="fw-bold text-teal" th:text="${c.suitabilityScore} + '/100'">94/100</span>
+                </td>
+                <td>
+                  <span th:if="${c.recommended}" class="rec-pill mb-0">RECOMMENDED</span>
+                  <span th:unless="${c.recommended}" class="badge bg-light text-muted border">ALTERNATIVE</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Alternative Destination Ports -->
+      <div class="wf-card mb-4">
+        <div class="wf-card-header">
+          <h4 class="wf-card-title mb-0">Alternative East Coast Destination Ports</h4>
+          <span class="text-micro">Congestion &amp; Demurrage Mitigation</span>
+        </div>
+        <div class="table-responsive">
+          <table class="wf-table">
+            <thead>
+              <tr>
+                <th>Alternative Port</th>
+                <th>Congestion Index</th>
+                <th>Max Allowable Draft</th>
+                <th>Vessel Compatibility</th>
+                <th>Est. Logistics Outlay</th>
+                <th>Assessment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="p : ${decision.portAlternatives}">
+                <td class="fw-bold text-dark" th:text="${p.portName}">Visakhapatnam</td>
+                <td th:text="${#numbers.formatDecimal(p.congestionIndex, 1, 0)} + '/100'">42/100</td>
+                <td th:text="${p.maxDraft} + ' m'">18.1 m</td>
+                <td>
+                  <span th:if="${p.accommodatesSelectedVessel}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">COMPATIBLE</span>
+                  <span th:unless="${p.accommodatesSelectedVessel}" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">INCOMPATIBLE</span>
+                </td>
+                <td class="fw-bold text-dark" th:text="${p.expectedCostInrFormatted}">₹37.34 Cr</td>
+                <td>
+                  <span th:classappend="${p.comparisonVerdict == 'BETTER' ? 'badge bg-success bg-opacity-10 text-success me-1' : (p.comparisonVerdict == 'COMPARABLE' ? 'badge bg-info bg-opacity-10 text-info me-1' : 'badge bg-danger bg-opacity-10 text-danger me-1')}"
+                        th:text="${p.comparisonVerdict}">BETTER</span>
+                  <span class="text-muted small" th:text="${p.deltaDescription}">Lower queue saves ₹1.56 Cr</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Audit Trail Bar -->
+      <div class="wf-card p-3 d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h5 class="wf-card-title mb-0">Immutable Relational Ledger Record</h5>
+          <span class="text-muted small">Recorded under fingerprint <strong class="text-teal font-mono" th:text="${decision.fingerprint}">NAV-...</strong></span>
+        </div>
+        <div class="d-flex gap-2">
+          <a th:href="@{'/charter/report/' + ${decision.fingerprint}}" target="_blank" class="btn-watchfloor-outline btn-sm">
+            🖨️ PDF Report
+          </a>
+          <a th:href="@{/history}" class="btn-watchfloor-outline btn-sm">
+            Decision History
+          </a>
+          <a th:href="@{/simulation}" class="btn-watchfloor-outline btn-sm">
+            What-If Simulator
+          </a>
+          <a th:href="@{/charter}" class="btn-watchfloor-primary btn-sm">
+            Plan Another Charter
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

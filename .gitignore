@@ -1,0 +1,64 @@
+# Compiled Java class files
+*.class
+
+# Build tools & packaging
+target/
+**/target/
+bin/
+**/bin/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# Maven wrapper exception if needed
+!.mvn/wrapper/maven-wrapper.jar
+
+# Environment & Sensitive Files
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.p12
+credentials.json
+secrets/
+
+# Logs
+*.log
+logs/
+
+# IDE and Editor files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.apt_generated
+.sts4-cache
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Dependencies / Virtual Environments
+node_modules/
+venv/
+.venv/
+env/
+__pycache__/
+
+# Database
+*.mv.db
+*.trace.db
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini

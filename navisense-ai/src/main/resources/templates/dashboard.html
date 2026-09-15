@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NAVISENSE AI — Maritime Watchfloor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Left Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <!-- Watchfloor Page Body -->
+    <div class="watchfloor-content">
+
+      <!-- 1. Top 4 KPI Metrics Row -->
+      <div class="kpi-row-card">
+        <!-- 01: Active Charters -->
+        <div class="kpi-column">
+          <div class="kpi-label">ACTIVE CHARTERS</div>
+          <div class="kpi-number">42</div>
+          <div class="kpi-delta pos">+3 this watch</div>
+        </div>
+
+        <!-- 02: Average Freight Rate -->
+        <div class="kpi-column">
+          <div class="kpi-label">AVG FREIGHT RATE</div>
+          <div class="kpi-number">$38.4K</div>
+          <div class="kpi-delta neg">-2.1% WoW</div>
+        </div>
+
+        <!-- 03: Port Availability -->
+        <div class="kpi-column">
+          <div class="kpi-label">PORT AVAILABILITY</div>
+          <div class="kpi-number">71%</div>
+          <div class="kpi-delta pos">+5% vs forecast</div>
+        </div>
+
+        <!-- 04: Active Alerts -->
+        <div class="kpi-column">
+          <div class="kpi-label">ACTIVE ALERTS</div>
+          <div class="kpi-number">6</div>
+          <div class="kpi-delta neg">2 critical</div>
+        </div>
+      </div>
+
+      <!-- 2. Middle 2-Column Section -->
+      <div class="row g-3 mb-3">
+
+        <!-- Left Column: Recommendation & Alerts -->
+        <div class="col-lg-6">
+          
+          <!-- Charter Recommendation Card -->
+          <div class="wf-card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="wf-card-title">Charter Recommendation</h3>
+              <span class="font-mono text-micro">REC-118</span>
+            </div>
+
+            <!-- Recommendation Box -->
+            <div class="rec-card-hero">
+              <div class="rec-pill">
+                <span class="rec-pill-dot"></span>
+                Recommended
+              </div>
+
+              <div class="rec-vessel-title" th:text="${executiveDecision != null ? executiveDecision.recommendedVessel : 'Panamax'}">Panamax</div>
+              <div class="rec-vessel-subtitle" th:text="${executiveDecision != null ? executiveDecision.routeDescription : 'Australia (Hay Point) → Paradip'}">Australia (Hay Point) → Paradip</div>
+
+              <!-- 3 Metrics -->
+              <div class="rec-metrics-grid">
+                <div class="rec-metric-box">
+                  <div class="rec-metric-label">WINDOW</div>
+                  <div class="rec-metric-val" th:text="${executiveDecision != null ? executiveDecision.bestCharterWindow : '17–24 Sep'}">17–24 Sep</div>
+                </div>
+                <div class="rec-metric-box">
+                  <div class="rec-metric-label">SAVING</div>
+                  <div class="rec-metric-val" th:text="${executiveDecision != null ? executiveDecision.potentialSavingsInrFormatted : '₹2.23 Cr'}">₹2.23 Cr</div>
+                </div>
+                <div class="rec-metric-box">
+                  <div class="rec-metric-label">CONFID</div>
+                  <div class="rec-metric-val" th:text="${executiveDecision != null ? (executiveDecision.decisionConfidence + '%') : '88%'}">88%</div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="rec-actions">
+                <a th:href="@{${executiveDecision != null ? ('/charter/result/' + executiveDecision.fingerprint) : '/charter'}}" class="btn-watchfloor-primary">
+                  Confirm Charter
+                </a>
+                <a th:href="@{${executiveDecision != null ? ('/charter/result/' + executiveDecision.fingerprint) : '/charter'}}" class="btn-watchfloor-outline">
+                  Review
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Operational Alerts Card -->
+          <div class="wf-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="wf-card-title">Live Operational Alerts</h3>
+              <span class="text-coral fw-bold" style="font-size: 0.8rem;">2 critical</span>
+            </div>
+
+            <!-- Critical Alert 1 -->
+            <div class="alert-item crit">
+              <div class="alert-item-header">
+                <div class="alert-item-title">Storm cell — Bay of Bengal</div>
+                <div class="alert-item-time">09:41Z</div>
+              </div>
+              <p class="alert-item-desc">Gale force 8 · route deviation advised</p>
+            </div>
+
+            <!-- Critical Alert 2 -->
+            <div class="alert-item crit">
+              <div class="alert-item-header">
+                <div class="alert-item-title">Berth queue — Paradip</div>
+                <div class="alert-item-time">09:12Z</div>
+              </div>
+              <p class="alert-item-desc">Expected wait 2.2 days · monitor closely</p>
+            </div>
+
+            <!-- Notice Alert 3 -->
+            <div class="alert-item ok">
+              <div class="alert-item-header">
+                <div class="alert-item-title">Draft clearance confirmed</div>
+                <div class="alert-item-time">08:55Z</div>
+              </div>
+              <p class="alert-item-desc">Panamax approved for current tide window</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Forecast & Corridor Comparison -->
+        <div class="col-lg-6">
+
+          <!-- Freight Forecast Card -->
+          <div class="wf-card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h3 class="wf-card-title">Freight Forecast</h3>
+                <div class="text-muted small mt-1">Australia → Paradip · 14-day</div>
+              </div>
+              <div class="text-end">
+                <span class="text-micro d-inline-block me-1">RATE $/T</span>
+                <span class="font-mono fw-bold fs-6 text-teal" th:text="${summary != null ? ('$' + #numbers.formatDecimal(summary.currentFreightIndex, 1, 2)) : '$25.64'}">$25.64</span>
+              </div>
+            </div>
+
+            <div class="forecast-chart-container">
+              <canvas id="watchfloorForecastChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Corridor Comparison Card -->
+          <div class="wf-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="wf-card-title">Corridor Comparison</h3>
+              <span class="text-muted small">4 corridors</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="wf-table">
+                <thead>
+                  <tr>
+                    <th>CORRIDOR</th>
+                    <th>RATE</th>
+                    <th>TRANSIT</th>
+                    <th>RISK</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="wf-table-corridor">Hay Point → Paradip</td>
+                    <td class="wf-table-rate">$24.50</td>
+                    <td class="wf-table-transit">17d</td>
+                    <td class="wf-table-risk">39/100</td>
+                  </tr>
+                  <tr>
+                    <td class="wf-table-corridor">Gladstone → Paradip</td>
+                    <td class="wf-table-rate">$24.20</td>
+                    <td class="wf-table-transit">18d</td>
+                    <td class="wf-table-risk">28/100</td>
+                  </tr>
+                  <tr>
+                    <td class="wf-table-corridor">Hay Point → Kandla</td>
+                    <td class="wf-table-rate">$26.65</td>
+                    <td class="wf-table-transit">20d</td>
+                    <td class="wf-table-risk">29/100</td>
+                  </tr>
+                  <tr>
+                    <td class="wf-table-corridor">Richards Bay → Paradip</td>
+                    <td class="wf-table-rate">$22.31</td>
+                    <td class="wf-table-transit">16d</td>
+                    <td class="wf-table-risk">38/100</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 3. Bottom Section: Recent Charter Decisions -->
+      <div class="wf-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="wf-card-title">Recent Charter Decisions</h3>
+          <a th:href="@{/history}" class="text-teal fw-semibold text-decoration-none small">
+            View complete history →
+          </a>
+        </div>
+
+        <div class="decision-cards-grid">
+          <!-- Mini Card 1 -->
+          <a th:href="@{/history}" class="decision-mini-card">
+            <div class="decision-mini-header">
+              <span class="decision-fingerprint">NAV-2600-008</span>
+              <span class="decision-status-pill">Confirmed</span>
+            </div>
+            <div class="decision-mini-vessel">Panamax</div>
+            <div class="decision-mini-route">Australia → Paradip</div>
+            <div class="decision-mini-footer">
+              <span class="decision-saving">₹2.23 Cr</span>
+              <span class="decision-confid">81%</span>
+            </div>
+          </a>
+
+          <!-- Mini Card 2 -->
+          <a th:href="@{/history}" class="decision-mini-card">
+            <div class="decision-mini-header">
+              <span class="decision-fingerprint">NAV-2600-009</span>
+              <span class="decision-status-pill">Confirmed</span>
+            </div>
+            <div class="decision-mini-vessel">Supramax</div>
+            <div class="decision-mini-route">Kandla → Busan</div>
+            <div class="decision-mini-footer">
+              <span class="decision-saving">₹1.88 Cr</span>
+              <span class="decision-confid">86%</span>
+            </div>
+          </a>
+
+          <!-- Mini Card 3 -->
+          <a th:href="@{/history}" class="decision-mini-card">
+            <div class="decision-mini-header">
+              <span class="decision-fingerprint">NAV-2600-008</span>
+              <span class="decision-status-pill">Confirmed</span>
+            </div>
+            <div class="decision-mini-vessel">Panamax</div>
+            <div class="decision-mini-route">Richards Bay → Haldia</div>
+            <div class="decision-mini-footer">
+              <span class="decision-saving">₹1.92 Cr</span>
+              <span class="decision-confid">79%</span>
+            </div>
+          </a>
+
+          <!-- Mini Card 4 -->
+          <a th:href="@{/history}" class="decision-mini-card">
+            <div class="decision-mini-header">
+              <span class="decision-fingerprint">NAV-2600-007</span>
+              <span class="decision-status-pill">Confirmed</span>
+            </div>
+            <div class="decision-mini-vessel">Kamsarmax</div>
+            <div class="decision-mini-route">Tubarao → Qingdao</div>
+            <div class="decision-mini-footer">
+              <span class="decision-saving">₹2.41 Cr</span>
+              <span class="decision-confid">84%</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/charts.js}"></script>
+<script>
+  // Fetch and render initial 14-day watchfloor forecast bar chart
+  fetch('/api/freight/forecast?origin=Australia&destination=Paradip&vessel=Panamax')
+    .then(r => r.json())
+    .then(data => {
+      renderWatchfloorForecastBarChart('watchfloorForecastChart', data.forecastPoints);
+    })
+    .catch(() => {
+      renderWatchfloorForecastBarChart('watchfloorForecastChart', []);
+    });
+</script>
+</body>
+</html>

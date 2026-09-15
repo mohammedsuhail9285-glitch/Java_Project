@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="footer-maritime mt-auto py-3">
+  <div class="container-xl px-3">
+    <div class="row align-items-center text-muted small gy-2">
+      <div class="col-md-7 text-center text-md-start">
+        <span class="text-white fw-bold">NAVISENSE AI</span> — Maritime Freight Forecasting & Vessel Charter Intelligence Platform
+        <div class="text-secondary small mt-1">
+          Developed for <strong>Smart India Hackathon 2026 (SIH26006)</strong> | <strong>Ministry of Steel &amp; SAIL</strong>
+        </div>
+      </div>
+      <div class="col-md-5 text-center text-md-end">
+        <div class="d-flex justify-content-center justify-content-md-end align-items-center gap-3">
+          <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25">Deterministic Demo</span>
+          <a th:href="@{/settings}" class="text-secondary text-decoration-none">Settings</a>
+          <a th:href="@{/about}" class="text-secondary text-decoration-none">Methodology</a>
+          <span class="text-secondary">Port 8081</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

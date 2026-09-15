@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operational Alerts — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="text-micro text-coral">OPERATIONAL SURVEILLANCE</span>
+            <span class="text-muted">• Real-Time Watchfloor Events</span>
+          </div>
+          <h2 class="fw-bold text-dark mb-0">Operational Maritime Alerts Feed</h2>
+          <p class="text-muted small mb-0">Deterministic alerts on freight spikes, port berth queues, draft clearance, and contract triggers</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="topbar-date-pill">
+            Active Alerts: <strong class="text-coral" th:text="${totalAlerts}">0</strong>
+          </span>
+          <a th:href="@{/dashboard}" class="btn-watchfloor-outline">
+            Watchfloor
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="wf-card p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <span class="text-micro me-1">CATEGORY:</span>
+            <a th:href="@{/alerts}" class="scenario-chip" th:classappend="${selectedCategory == null ? 'active' : ''}">All</a>
+            <a th:href="@{/alerts(category='PORT')}" class="scenario-chip" th:classappend="${selectedCategory == 'PORT' ? 'active' : ''}">Port Operations</a>
+            <a th:href="@{/alerts(category='VESSEL')}" class="scenario-chip" th:classappend="${selectedCategory == 'VESSEL' ? 'active' : ''}">Fleet &amp; Vessel</a>
+            <a th:href="@{/alerts(category='RISK')}" class="scenario-chip" th:classappend="${selectedCategory == 'RISK' ? 'active' : ''}">Corridor Risk</a>
+            <a th:href="@{/alerts(category='FREIGHT')}" class="scenario-chip" th:classappend="${selectedCategory == 'FREIGHT' ? 'active' : ''}">Freight Spikes</a>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="text-micro me-1">SEVERITY:</span>
+            <a th:href="@{/alerts(severity='DANGER')}" class="badge bg-danger bg-opacity-10 text-danger border text-decoration-none py-1 px-2">Critical</a>
+            <a th:href="@{/alerts(severity='SUCCESS')}" class="badge bg-success bg-opacity-10 text-success border text-decoration-none py-1 px-2">Notice / Cleared</a>
+            <a th:href="@{/alerts(severity='INFO')}" class="badge bg-light text-muted border text-decoration-none py-1 px-2">Informational</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Grid -->
+      <div class="row g-3 mb-4">
+        <div th:if="${#lists.isEmpty(alerts)}" class="col-12">
+          <div class="wf-card p-5 text-center text-muted">
+            <div class="fs-1 mb-2">🔔</div>
+            <h5 class="text-dark">No Alerts Under Current Criteria</h5>
+            <p class="small mb-3">All parameters are within normal operational tolerances.</p>
+            <a th:href="@{/alerts}" class="btn-watchfloor-primary btn-sm">Clear Filter</a>
+          </div>
+        </div>
+
+        <div th:each="alert : ${alerts}" class="col-md-6 col-xl-4">
+          <div class="alert-item h-100" th:classappend="${alert.severity == 'DANGER' ? 'crit' : (alert.severity == 'SUCCESS' ? 'ok' : 'warn')}">
+            <div class="alert-item-header">
+              <span class="rec-pill mb-0" th:text="${alert.category}">PORT</span>
+              <span class="alert-item-time" th:text="${alert.timestamp}">12:45 IST</span>
+            </div>
+            <h4 class="alert-item-title my-2" th:text="${alert.title}">Port Berth Congestion Alert</h4>
+            <p class="alert-item-desc mb-3" style="line-height: 1.5;" th:text="${alert.message}">
+              Paradip port congestion index stands at 55/100 (~2.2 wait days). Demurrage buffer included.
+            </p>
+            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+              <span class="font-mono text-micro" th:text="${alert.id}">ALT-102</span>
+              <a th:href="@{/charter}" class="text-teal fw-semibold text-decoration-none small">Simulate Impact ➔</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

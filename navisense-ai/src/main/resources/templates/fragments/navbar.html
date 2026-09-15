@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-maritime sticky-top py-2">
+  <div class="container-xl px-3">
+    <!-- Brand Logo -->
+    <a class="navbar-brand d-flex align-items-center gap-2 me-3" th:href="@{/}">
+      <span class="fs-4">⚓</span>
+      <span class="fw-bold tracking-wide text-white">NAVISENSE <span class="text-cyan">AI</span></span>
+      <span class="brand-badge ms-1">SIH26006</span>
+    </a>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navContent"
+            aria-controls="navContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Main Navigation Items -->
+    <div class="collapse navbar-collapse" id="navContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
+        <!-- 1. Dashboard -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'dashboard' ? 'active' : ''}" th:href="@{/dashboard}">
+            Dashboard
+          </a>
+        </li>
+
+        <!-- 2. Charter Analysis (Primary Action) -->
+        <li class="nav-item">
+          <a class="nav-link fw-semibold" th:classappend="${activeNav == 'charter' ? 'active text-cyan' : ''}" th:href="@{/charter}">
+            ⚡ Charter Analysis
+          </a>
+        </li>
+
+        <!-- 3. Forecast -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'forecast' ? 'active' : ''}" th:href="@{/forecast}">
+            Forecast
+          </a>
+        </li>
+
+        <!-- 4. Vessel Optimizer -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'vessels' ? 'active' : ''}" th:href="@{/vessels}">
+            Vessels
+          </a>
+        </li>
+
+        <!-- 5. Ports & Routes Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" th:classappend="${activeNav == 'ports' || activeNav == 'routes' ? 'active' : ''}"
+             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Ports & Routes
+          </a>
+          <ul class="dropdown-menu dropdown-menu-maritime">
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'ports' ? 'active text-cyan' : ''}" th:href="@{/ports}">
+                <span>🏗️</span>
+                <span>Port Constraint Matrix</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'routes' ? 'active text-cyan' : ''}" th:href="@{/routes}">
+                <span>🗺️</span>
+                <span>Trade Corridors Heatmap</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 6. What-If Simulator -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'simulation' ? 'active' : ''}" th:href="@{/simulation}">
+            Simulator
+          </a>
+        </li>
+
+        <!-- 7. Alerts -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'alerts' ? 'active' : ''}" th:href="@{/alerts}">
+            Alerts
+          </a>
+        </li>
+
+        <!-- 8. History Ledger -->
+        <li class="nav-item">
+          <a class="nav-link" th:classappend="${activeNav == 'history' ? 'active' : ''}" th:href="@{/history}">
+            History
+          </a>
+        </li>
+
+        <!-- 9. Secondary Tools Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle"
+             th:classappend="${activeNav == 'backtest' || activeNav == 'risk' || activeNav == 'copilot' || activeNav == 'datalab' || activeNav == 'settings' || activeNav == 'about' ? 'active' : ''}"
+             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Tools
+          </a>
+          <ul class="dropdown-menu dropdown-menu-maritime">
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'copilot' ? 'active text-cyan' : ''}" th:href="@{/copilot}">
+                <span>🤖</span>
+                <span>Ask NaviSense Copilot</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'backtest' ? 'active text-cyan' : ''}" th:href="@{/backtest}">
+                <span>⏪</span>
+                <span>Historical Backtest Engine</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'risk' ? 'active text-cyan' : ''}" th:href="@{/risk}">
+                <span>🛡️</span>
+                <span>Risk & Demurrage Monitor</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'datalab' ? 'active text-cyan' : ''}" th:href="@{/data-lab}">
+                <span>💾</span>
+                <span>Observability Data Lab</span>
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'settings' ? 'active text-cyan' : ''}" th:href="@{/settings}">
+                <span>⚙️</span>
+                <span>Platform Governance & Assumptions</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" th:classappend="${activeNav == 'about' ? 'active text-cyan' : ''}" th:href="@{/about}">
+                <span>ℹ️</span>
+                <span>Architecture & Methodology</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Right Action CTAs -->
+      <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+        <a th:href="@{/demo}" class="btn btn-outline-cyan btn-sm">
+          ▶ Demo Scenarios
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+</body>
+</html>

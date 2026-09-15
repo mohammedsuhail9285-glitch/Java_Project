@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Scenarios — NAVISENSE AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<div class="watchfloor-layout">
+  <!-- Sidebar Navigation -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- Main Content Area -->
+  <main class="watchfloor-main">
+    <!-- Top Watch Bar -->
+    <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+    <div class="watchfloor-content">
+
+      <div class="wf-card p-4 mb-4 text-center">
+        <span class="rec-pill mb-2">SIH26006 LIVE EVALUATION MODE</span>
+        <h2 class="display-6 fw-bold text-dark mb-2">90-Second Hackathon Demonstration Workflow</h2>
+        <p class="text-muted mx-auto" style="max-width: 750px;">
+          Follow this streamlined step-by-step judge demonstration flow showcasing end-to-end maritime charter intelligence.
+        </p>
+
+        <!-- Transition Banner -->
+        <div class="p-3 my-3 rounded bg-light border">
+          <div class="row align-items-center">
+            <div class="col-md-5 text-center text-md-end">
+              <span class="badge bg-secondary px-3 py-2">FROM REACTIVE CHARTERING</span>
+              <div class="small text-muted mt-1">High spot rates, sudden queues, demurrage penalties</div>
+            </div>
+            <div class="col-md-2 text-center my-2 my-md-0">
+              <span class="fs-4 text-teal">➔</span>
+            </div>
+            <div class="col-md-5 text-center text-md-start">
+              <span class="rec-pill px-3 py-2">TO PREDICTIVE PROCUREMENT</span>
+              <div class="small text-teal mt-1">Forecasting, draft protection, fleet optimization, ₹ Cr savings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="wf-card p-4 h-100">
+            <h4 class="wf-card-title mb-3">Evaluation Script (90 Seconds)</h4>
+            <ol class="text-muted small mb-0 ps-3" style="line-height: 1.8;">
+              <li>
+                <strong class="text-dark">The Problem Context:</strong>
+                Explain that SAIL imports millions of tonnes of coking coal annually from Australia, USA, and Mozambique, often relying on reactive spot procurement that exposes steel production to high rate volatility and demurrage.
+              </li>
+              <li>
+                <strong class="text-dark">Open the Watchfloor:</strong>
+                Demonstrate the <strong>Watchfloor Dashboard</strong> with active charter metrics, freight forecast bar chart, corridor comparisons, and live operational alerts.
+              </li>
+              <li>
+                <strong class="text-dark">Trigger Benchmark Scenario 1:</strong>
+                Navigate to <strong>Charter Analysis</strong> and select <em>Scenario 1 (Australia ➔ Paradip, 150,000 t)</em>. Click <em>Analyze Charter</em>.
+              </li>
+              <li>
+                <strong class="text-dark">Inspect The Decision:</strong>
+                Show the <strong>BOOK NOW</strong> recommendation with <strong>Panamax</strong> vessel class, ₹1.84 Cr savings, 88% confidence, and the mathematical explanation.
+              </li>
+              <li>
+                <strong class="text-dark">Highlight Port Constraint Verification:</strong>
+                Point out that Capesize was rejected due to Paradip's 16.5m draft boundary, preventing disastrous grounding and demurrage.
+              </li>
+              <li>
+                <strong class="text-dark">Test What-If Sensitivity:</strong>
+                Open the <strong>What-If Simulator</strong> to show resilience under a +10% freight rate spike or +25% port congestion delay.
+              </li>
+              <li>
+                <strong class="text-dark">Ask NaviSense Copilot:</strong>
+                Ask <em>"Why was Capesize rejected?"</em> to demonstrate autonomous offline domain intelligence.
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="wf-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+              <h4 class="wf-card-title mb-3">Direct Interactive Launchers</h4>
+              <div class="d-grid gap-3">
+                <a th:href="@{/charter(scenario=1)}" class="btn-watchfloor-primary text-start p-3 d-block">
+                  <span class="fs-6 fw-bold d-block">⚡ 1. Run Scenario 1 (Australia ➔ Paradip)</span>
+                  <small style="opacity: 0.9;">150,000 tonnes Coking Coal, Panamax, Short-Term COA</small>
+                </a>
+                <a th:href="@{/dashboard}" class="btn-watchfloor-outline text-start p-3 d-block">
+                  <span class="fs-6 fw-bold d-block text-dark">📊 2. View Watchfloor Command Center</span>
+                  <small class="text-muted">KPI metrics, live alerts, and corridor comparison</small>
+                </a>
+                <a th:href="@{/simulation}" class="btn-watchfloor-outline text-start p-3 d-block">
+                  <span class="fs-6 fw-bold d-block text-dark">🧪 3. Launch What-If Simulator</span>
+                  <small class="text-muted">Simulate freight inflation and port congestion shocks</small>
+                </a>
+                <a th:href="@{/backtest}" class="btn-watchfloor-outline text-start p-3 d-block">
+                  <span class="fs-6 fw-bold d-block text-dark">⏪ 4. Historical Backtesting</span>
+                  <small class="text-muted">12-month simulated savings track record (₹24.28 Cr cumulative)</small>
+                </a>
+              </div>
+            </div>
+            <div class="alert alert-light border mt-3 mb-0 small text-muted">
+              All algorithms run 100% locally in Java without external paid APIs, live internet dependencies, or Python runtime.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

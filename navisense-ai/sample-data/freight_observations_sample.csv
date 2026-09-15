@@ -1,0 +1,11 @@
+date,origin_country,loading_port,destination_port,vessel_class,rate_usd_per_tonne,bdi_index,fuel_price_usd,congestion_index
+2026-09-10,Australia,Hay Point,Paradip,Panamax,24.50,1865.0,620.0,55.0
+2026-09-09,Australia,Hay Point,Paradip,Panamax,24.45,1860.0,619.5,54.8
+2026-09-08,Australia,Hay Point,Paradip,Panamax,24.38,1852.0,618.0,55.2
+2026-09-07,Australia,Hay Point,Paradip,Panamax,24.30,1845.0,617.5,54.0
+2026-09-06,Australia,Hay Point,Paradip,Panamax,24.25,1840.0,616.0,53.5
+2026-09-10,United States,Hampton Roads,Visakhapatnam,Capesize,36.20,1865.0,620.0,42.0
+2026-09-09,United States,Hampton Roads,Visakhapatnam,Capesize,36.10,1860.0,619.0,41.5
+2026-09-10,Mozambique,Maputo,Dhamra,Supramax,21.80,1865.0,620.0,38.0
+2026-09-10,Indonesia,Tanjung Bara,Haldia,Handysize,15.60,1865.0,620.0,68.0
+2026-09-10,Russia,Ust-Luga,Paradip,Panamax,38.50,1865.0,620.0,55.0
