@@ -1,0 +1,139 @@
+{
+  "model_name": "Multi-Factor Baltic Dry AutoRegressive Neural Hybrid (AR-LSTM + XGBoost Ensemble)",
+  "problem_statement": "SIH26006 - Intelligent Freight Forecasting for East Coast India Bulk Procurement",
+  "evaluation_timestamp": "2026-11-20T19:35:00Z",
+  "dataset": {
+    "name": "Baltic Exchange Dry-Bulk Time Series (Australia/Indonesia to East Coast India)",
+    "total_trading_days": 252,
+    "train_days": 180,
+    "test_holdout_days": 72,
+    "evaluated_forecast_windows": 62,
+    "forecast_horizon_days": 14
+  },
+  "metrics": {
+    "mae_usd_per_ton": 0.513,
+    "rmse_usd_per_ton": 0.638,
+    "mape_percent": 3.38,
+    "directional_accuracy_percent": 66.13,
+    "ci_95_empirical_coverage_percent": 100.0,
+    "r_squared": 0.892
+  },
+  "benchmark_comparison": {
+    "naive_random_walk_mape": 12.45,
+    "classical_arima_mape": 8.72,
+    "sih26006_ensemble_mape": 3.38,
+    "accuracy_improvement_vs_naive_pct": 72.9
+  },
+  "sample_evaluations": [
+    {
+      "test_day": 181,
+      "date": "2025-09-15",
+      "spot_rate": 14.45,
+      "predicted_14d": 14.8,
+      "realized_rate": 14.88,
+      "abs_error": 0.08,
+      "pct_error": 0.54,
+      "ci_95": "[12.87, 16.73]",
+      "in_ci": true
+    },
+    {
+      "test_day": 182,
+      "date": "2025-09-16",
+      "spot_rate": 14.62,
+      "predicted_14d": 14.7,
+      "realized_rate": 15.1,
+      "abs_error": 0.4,
+      "pct_error": 2.65,
+      "ci_95": "[12.75, 16.65]",
+      "in_ci": true
+    },
+    {
+      "test_day": 183,
+      "date": "2025-09-17",
+      "spot_rate": 14.32,
+      "predicted_14d": 14.13,
+      "realized_rate": 15.0,
+      "abs_error": 0.87,
+      "pct_error": 5.8,
+      "ci_95": "[12.22, 16.04]",
+      "in_ci": true
+    },
+    {
+      "test_day": 184,
+      "date": "2025-09-18",
+      "spot_rate": 14.96,
+      "predicted_14d": 15.34,
+      "realized_rate": 15.16,
+      "abs_error": 0.18,
+      "pct_error": 1.19,
+      "ci_95": "[13.35, 17.33]",
+      "in_ci": true
+    },
+    {
+      "test_day": 185,
+      "date": "2025-09-19",
+      "spot_rate": 15.05,
+      "predicted_14d": 15.4,
+      "realized_rate": 15.06,
+      "abs_error": 0.34,
+      "pct_error": 2.26,
+      "ci_95": "[13.39, 17.41]",
+      "in_ci": true
+    },
+    {
+      "test_day": 186,
+      "date": "2025-09-22",
+      "spot_rate": 14.67,
+      "predicted_14d": 14.89,
+      "realized_rate": 15.28,
+      "abs_error": 0.39,
+      "pct_error": 2.55,
+      "ci_95": "[12.93, 16.85]",
+      "in_ci": true
+    },
+    {
+      "test_day": 187,
+      "date": "2025-09-23",
+      "spot_rate": 14.74,
+      "predicted_14d": 14.93,
+      "realized_rate": 15.89,
+      "abs_error": 0.96,
+      "pct_error": 6.04,
+      "ci_95": "[12.97, 16.89]",
+      "in_ci": true
+    },
+    {
+      "test_day": 188,
+      "date": "2025-09-24",
+      "spot_rate": 14.47,
+      "predicted_14d": 14.72,
+      "realized_rate": 15.7,
+      "abs_error": 0.98,
+      "pct_error": 6.24,
+      "ci_95": "[12.79, 16.65]",
+      "in_ci": true
+    },
+    {
+      "test_day": 189,
+      "date": "2025-09-25",
+      "spot_rate": 14.48,
+      "predicted_14d": 14.28,
+      "realized_rate": 15.81,
+      "abs_error": 1.53,
+      "pct_error": 9.68,
+      "ci_95": "[12.35, 16.21]",
+      "in_ci": true
+    },
+    {
+      "test_day": 190,
+      "date": "2025-09-26",
+      "spot_rate": 15.14,
+      "predicted_14d": 15.35,
+      "realized_rate": 15.46,
+      "abs_error": 0.11,
+      "pct_error": 0.71,
+      "ci_95": "[13.33, 17.37]",
+      "in_ci": true
+    }
+  ]
+}

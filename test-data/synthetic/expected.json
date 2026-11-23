@@ -1,0 +1,26 @@
+{
+  "compliant_atta.png": {
+    "mrp": "240.00",
+    "net_qty": "5 kg",
+    "manufacturer": "Swarna Milling Pvt Ltd",
+    "mfg_date": "10/2026"
+  },
+  "missing_mrp_detergent.png": {
+    "mrp": null,
+    "net_qty": "500 g",
+    "manufacturer": "EcoSpark Clean Solutions Ltd",
+    "mfg_date": "09/2026"
+  },
+  "mismatch_honey.png": {
+    "mrp": "299.00",
+    "net_qty": "500 g",
+    "manufacturer": "Himalayan Valley Apiaries",
+    "mfg_date": "08/2026"
+  },
+  "vedika_facewash.png": {
+    "mrp": "175.00",
+    "net_qty": "150 ml",
+    "manufacturer": "Vedika Herbals Ltd",
+    "mfg_date": "11/2026"
+  }
+}

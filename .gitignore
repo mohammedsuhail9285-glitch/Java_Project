@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+venv/
+ai-service/venv/
+.venv/
+
+# Build artifacts
+target/
+backend/target/
+dist/
+frontend/dist/
+
+# Logs & temp
+*.log
+data/
+storage/uploads/
+*.tmp
+__pycache__/
+*.pyc
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
