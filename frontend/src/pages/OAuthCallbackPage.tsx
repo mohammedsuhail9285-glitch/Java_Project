@@ -25,6 +25,17 @@ export const OAuthCallbackPage: React.FC = () => {
       const processToken = async () => {
         try {
           await loginWithToken(token);
+          // Navigate based on user role: ANALYST directly to /freight, others to /
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            try {
+              const parsed = JSON.parse(savedUser);
+              if (parsed.role === 'ANALYST') {
+                navigate('/freight', { replace: true });
+                return;
+              }
+            } catch {}
+          }
           navigate('/', { replace: true });
         } catch (err: any) {
           setErrorMessage('Failed to finalize authentication session.');

@@ -33,20 +33,23 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final String defaultRoleName;
     private final String frontendCallbackUrl;
     private final boolean cookieSecure;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     public OAuth2AuthenticationSuccessHandler(
             UserRepository userRepository,
             JwtUtils jwtUtils,
             AuditLogService auditLogService,
             @Value("${app.oauth2.default-role:VIEWER}") String defaultRoleName,
-            @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth2/callback}") String frontendCallbackUrl,
-            @Value("${app.security.cookie-secure:false}") boolean cookieSecure) {
+            @Value("${app.oauth2.redirect-uri:${FRONTEND_OAUTH_REDIRECT_URI:http://localhost:3000/oauth2/callback}}") String frontendCallbackUrl,
+            @Value("${app.security.cookie-secure:false}") boolean cookieSecure,
+            HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.auditLogService = auditLogService;
         this.defaultRoleName = defaultRoleName;
         this.frontendCallbackUrl = frontendCallbackUrl;
         this.cookieSecure = cookieSecure;
+        this.cookieAuthorizationRequestRepository = cookieAuthorizationRequestRepository;
     }
 
     @Override
@@ -142,6 +145,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             .queryParam("isNewUser", isNewUser)
             .build().toUriString();
 
+        cookieAuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
         clearAuthenticationAttributes(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

@@ -59,6 +59,7 @@ export const App: React.FC = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
+          <Route path="/oauth2/redirect" element={<OAuthCallbackPage />} />
 
           <Route
             path="/"
