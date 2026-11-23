@@ -113,6 +113,20 @@ export const LoginPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [resendCooldown]);
 
+  // Clear error and clean URL error query param
+  const clearError = () => {
+    setError(null);
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  };
+
+  const handleDemoSelect = (demoUsername: string, demoPassword: string) => {
+    clearError();
+    setUsername(demoUsername);
+    setPassword(demoPassword);
+  };
+
   // Handle standard password login
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +134,7 @@ export const LoginPage: React.FC = () => {
       setError('Please provide your username or registered email and password.');
       return;
     }
-    setError(null);
+    clearError();
     setUnverifiedEmail(null);
     setPasswordLoading(true);
 
@@ -306,8 +320,9 @@ export const LoginPage: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => setError(null)}
-                className="text-rose-400 hover:text-rose-600 text-sm font-bold leading-none"
+                onClick={clearError}
+                className="text-rose-400 hover:text-rose-600 text-sm font-bold leading-none p-1"
+                aria-label="Dismiss error"
               >
                 ×
               </button>
@@ -345,7 +360,7 @@ export const LoginPage: React.FC = () => {
               type="button"
               onClick={() => {
                 setActiveTab('password');
-                setError(null);
+                clearError();
               }}
               className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
                 activeTab === 'password'
@@ -359,7 +374,7 @@ export const LoginPage: React.FC = () => {
               type="button"
               onClick={() => {
                 setActiveTab('otp');
-                setError(null);
+                clearError();
               }}
               className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
                 activeTab === 'otp'
@@ -446,10 +461,7 @@ export const LoginPage: React.FC = () => {
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
-                    onClick={() => {
-                      setUsername('regulator');
-                      setPassword('Regulator@123');
-                    }}
+                    onClick={() => handleDemoSelect('regulator', 'Regulator@123')}
                     className={`text-[10px] px-2 py-0.5 rounded border transition font-mono ${
                       username === 'regulator'
                         ? 'bg-blue-50 border-blue-300 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-bold'
@@ -460,10 +472,7 @@ export const LoginPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setUsername('admin');
-                      setPassword('Admin@123');
-                    }}
+                    onClick={() => handleDemoSelect('admin', 'Admin@123')}
                     className={`text-[10px] px-2 py-0.5 rounded border transition font-mono ${
                       username === 'admin'
                         ? 'bg-blue-50 border-blue-300 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-bold'
@@ -474,10 +483,7 @@ export const LoginPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setUsername('analyst');
-                      setPassword('Analyst@123');
-                    }}
+                    onClick={() => handleDemoSelect('analyst', 'Analyst@123')}
                     className={`text-[10px] px-2 py-0.5 rounded border transition font-mono ${
                       username === 'analyst'
                         ? 'bg-blue-50 border-blue-300 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-bold'
@@ -488,10 +494,7 @@ export const LoginPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setUsername('reviewer');
-                      setPassword('Reviewer@123');
-                    }}
+                    onClick={() => handleDemoSelect('reviewer', 'Reviewer@123')}
                     className={`text-[10px] px-2 py-0.5 rounded border transition font-mono ${
                       username === 'reviewer'
                         ? 'bg-blue-50 border-blue-300 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-bold'
