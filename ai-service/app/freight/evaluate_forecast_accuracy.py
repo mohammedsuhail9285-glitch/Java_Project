@@ -12,7 +12,14 @@ Computes genuine:
 import json
 import math
 import os
+import sys
+from pathlib import Path
 from typing import Dict, Any, List
+
+AI_SERVICE_DIR = str(Path(__file__).resolve().parent.parent.parent)
+if AI_SERVICE_DIR not in sys.path:
+    sys.path.insert(0, AI_SERVICE_DIR)
+
 from app.freight.historical_baltic_data import generate_historical_baltic_data
 from app.freight.forecasting_engine import FreightForecastingEngine
 

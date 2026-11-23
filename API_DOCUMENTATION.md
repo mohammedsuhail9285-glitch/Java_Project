@@ -1,244 +1,405 @@
-# RegTech Sentinel — REST API Documentation
+# REST API SPECIFICATION REFERENCE
+## RegTech Sentinel — Unified Platform Endpoints
 
-Comprehensive REST API specification for RegTech Sentinel (Department of Consumer Affairs, Government of India).
-
-Base URL: `http://localhost:8080/api/v1`  
-AI Microservice Base URL: `http://localhost:8000`  
-Swagger UI: `http://localhost:8080/swagger-ui.html`  
-OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+**Base URL (Local):** `http://localhost:8080/api/v1`  
+**Authentication Scheme:** HTTP Bearer Authentication (JWT in `Authorization` header)  
+**Data Format:** JSON (`application/json`)
 
 ---
 
-## 1. Authentication & RBAC (`/auth`)
+## 1. Authentication & Security Endpoints (`/api/v1/auth`)
 
-### `POST /auth/login`
-Authenticates a user and issues a signed JWT bearer token.
+### 1.1 User Login
+- **Endpoint:** `POST /api/v1/auth/login`
+- **Access:** Public (Rate Limited to 120 req/min)
 - **Request Body:**
   ```json
   {
-    "username": "regulator",
-    "password": "Regulator@123"
+    "username": "analyst",
+    "password": "Analyst@123",
+    "rememberMe": true
   }
   ```
-- **Response `200 OK`:**
+- **Success Response (200 OK):**
   ```json
   {
-    "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-    "tokenType": "Bearer",
-    "user": {
-      "id": 2,
-      "username": "regulator",
-      "email": "regulator@consumeraffairs.nic.in",
-      "fullName": "Priya Sharma",
-      "role": "REGULATOR",
-      "designation": "Deputy Controller",
-      "department": "Legal Metrology Division"
+    "success": true,
+    "message": "Authentication successful",
+    "data": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "type": "Bearer",
+      "userId": 3,
+      "username": "analyst",
+      "email": "analyst@regtech.gov.in",
+      "fullName": "Senior Freight Analyst",
+      "role": "ROLE_ANALYST",
+      "department": "Freight Intelligence",
+      "expiresIn": 86400
+    }
+  }
+  ```
+- **Failure Responses:**
+  - `401 Unauthorized`: `"Invalid username or password. Please verify your credentials."`
+  - `401 Unauthorized` (Account Locked): `"Account is temporarily locked. Please try again later or reset your password."`
+
+---
+
+### 1.2 User Registration
+- **Endpoint:** `POST /api/v1/auth/register`
+- **Access:** Public
+- **Request Body:**
+  ```json
+  {
+    "username": "shipping_officer",
+    "email": "officer@steel.gov.in",
+    "password": "SecurePassword@123",
+    "fullName": "Shipping Procurement Officer",
+    "department": "Logistics & Chartering"
+  }
+  ```
+- **Success Response (201 Created):**
+  ```json
+  {
+    "success": true,
+    "message": "User registered successfully. Please verify your email.",
+    "data": {
+      "userId": 5,
+      "username": "shipping_officer",
+      "email": "officer@steel.gov.in",
+      "role": "ROLE_VIEWER",
+      "emailVerified": false
     }
   }
   ```
 
-### `GET /auth/me`
-Retrieves the authenticated user's profile.
-- **Headers:** `Authorization: Bearer <token>`
-- **Response `200 OK`:** User object
+---
+
+### 1.3 Verify Email
+- **Endpoint:** `POST /api/v1/auth/verify-email?token={token}`
+- **Access:** Public
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Email verified successfully. You may now log in.",
+    "data": null
+  }
+  ```
 
 ---
 
-## 2. Product Catalog (`/products`)
-
-### `GET /products`
-Searches catalog with optional filters and pagination.
-- **Parameters:** `keyword`, `categoryId`, `sellerId`, `status`, `page`, `size`, `sortBy`, `direction`
-- **Response `200 OK`:** `ApiResponse<Page<ProductDetailDto>>`
-
-### `GET /products/{id}`
-Retrieves complete product record by ID.
-
-### `GET /products/{id}/fields`
-Retrieves OCR-extracted statutory fields with bounding boxes and confidence scores.
-
-### `GET /products/{id}/ocr`
-Retrieves raw OCR text, recognized lines, and language metadata.
+### 1.4 Forgot Password
+- **Endpoint:** `POST /api/v1/auth/forgot-password`
+- **Access:** Public
+- **Request Body:**
+  ```json
+  { "email": "officer@steel.gov.in" }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "If the account exists, a password reset link has been dispatched.",
+    "data": null
+  }
+  ```
 
 ---
 
-## 3. Violations & Regulatory Review (`/violations`)
-
-### `GET /violations`
-Lists potential non-compliance cases.
-- **Parameters:** `status` (`NEW`, `UNDER_REVIEW`, `CONFIRMED`, `DISMISSED`, `RESOLVED`), `severity` (`CRITICAL`, `MAJOR`, `MINOR`), `ruleId`, `productId`, `page`, `size`
-- **Response `200 OK`:** `Page<ViolationDto>`
-
-### `GET /violations/{id}`
-Retrieves single violation with linked `Evidence` (original image path, cropped crop path, bounding box coordinates, and raw OCR text).
-
-### `POST /violations/{id}/review`
-Commits a human regulator review decision with statutory rationale.
-- **Access:** `REGULATOR`, `REVIEWER`, `ADMIN`
+### 1.5 Reset Password
+- **Endpoint:** `POST /api/v1/auth/reset-password`
+- **Access:** Public
 - **Request Body:**
   ```json
   {
-    "action": "CONFIRM",
-    "comment": "Verified physical label does not bear compliant declaration as required by LMPC Rule 6.",
-    "remediationAction": "Issue statutory notice under LM Act Sec 36"
+    "token": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "newPassword": "BrandNewPassword@123"
   }
   ```
-- **Response `200 OK`:** Updated `ViolationDto`
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Password has been successfully reset. Please log in with your new credentials.",
+    "data": null
+  }
+  ```
 
 ---
 
-## 4. Ingestion & Scans (`/ingestion`, `/scans`)
+## 2. User Administration Endpoints (`/api/v1/users`)
 
-### `POST /ingestion/manual`
-Creates a single product with optional image upload and triggers automated scan.
+### 2.1 Promote User Role
+- **Endpoint:** `PATCH /api/v1/users/{id}/role`
+- **Access:** Restricted to `ROLE_ADMIN`
+- **Query / Param:** `newRole=ROLE_ANALYST`
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "User role updated successfully",
+    "data": {
+      "userId": 5,
+      "username": "shipping_officer",
+      "role": "ROLE_ANALYST"
+    }
+  }
+  ```
 
-### `POST /ingestion/upload`
-Uploads a batch catalog file (CSV or JSON).
+### 2.2 Unlock Account
+- **Endpoint:** `POST /api/v1/users/{id}/unlock`
+- **Access:** Restricted to `ROLE_ADMIN`
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "User account unlocked successfully",
+    "data": null
+  }
+  ```
 
-### `POST /ingestion/url`
-Fetches a single marketplace URL via the safe crawler interface.
+---
 
-### `POST /ingestion/crawl-sandbox`
-Executes safe simulated sandbox crawl across pre-configured e-commerce products without making live external HTTP scraping calls.
+## 3. SIH26006 Maritime Freight Endpoints (`/api/v1/freight`)
+
+### 3.1 Get Baltic Market Intelligence & Benchmarks
+- **Endpoint:** `GET /api/v1/freight/market-data`
+- **Access:** Authenticated (`VIEWER`, `ANALYST`, `REVIEWER`, `REGULATOR`, `ADMIN`)
+- **Query Params:** `days=30` (optional, default 30)
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Market data retrieved successfully",
+    "data": {
+      "currentIndices": {
+        "BDI": 1845.0,
+        "BCI": 2890.0,
+        "BPI": 1620.0,
+        "BSI": 1280.0,
+        "BrentCrudeUSD": 82.50,
+        "LSFO380USD": 620.00
+      },
+      "historicalSeries": [
+        {
+          "recordDate": "2026-11-20",
+          "bdi": 1840.0,
+          "bci": 2875.0,
+          "bpi": 1615.0,
+          "bsi": 1275.0,
+          "brentCrudeUsd": 82.10,
+          "dataSource": "HISTORICAL_BENCHMARK"
+        }
+      ]
+    }
+  }
+  ```
+
+---
+
+### 3.2 14-Day Freight Forecast with 95% Confidence Intervals
+- **Endpoint:** `GET /api/v1/freight/forecast`
+- **Access:** Authenticated (`ANALYST`, `ADMIN`)
+- **Query Params:**
+  - `routeCode=AU-HAY-IN-PAR` (Hay Point to Paradip)
+  - `horizonDays=14`
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "14-day freight forecast generated",
+    "data": {
+      "routeCode": "AU-HAY-IN-PAR",
+      "modelUsed": "Holt-Winters Triple Exponential Smoothing",
+      "baselineRateUSD": 14.80,
+      "predictions": [
+        {
+          "dayIndex": 1,
+          "forecastDate": "2026-11-24",
+          "predictedRateUSD": 14.85,
+          "confidenceIntervalLower95": 14.32,
+          "confidenceIntervalUpper95": 15.38,
+          "trendDirection": "UPWARD"
+        },
+        {
+          "dayIndex": 14,
+          "forecastDate": "2026-12-07",
+          "predictedRateUSD": 15.42,
+          "confidenceIntervalLower95": 13.90,
+          "confidenceIntervalUpper95": 16.94,
+          "trendDirection": "UPWARD"
+        }
+      ]
+    }
+  }
+  ```
+
+---
+
+### 3.3 Automated Vessel Chartering Optimization
+- **Endpoint:** `POST /api/v1/freight/optimize-vessel`
+- **Access:** Authenticated (`ANALYST`, `ADMIN`)
 - **Request Body:**
   ```json
   {
-    "batchSize": 5,
-    "platform": "RetailBharat"
+    "originPortCode": "AU-HAY",
+    "destinationPortCode": "IN-HAL",
+    "cargoType": "COKING_COAL",
+    "cargoQuantityMT": 75000,
+    "charterType": "SPOT"
   }
   ```
-
-### `GET /scans/jobs`
-Lists background scan jobs with execution stages (`PROCESSING`, `OCR_PROCESSING`, `VALIDATING`, `COMPLETED`).
-
----
-
-## 5. LMPC Statutory Rules & Simulator (`/rules`)
-
-### `GET /rules`
-Lists all active legal metrology rules (`LM001` to `LM010`).
-
-### `PUT /rules/{id}`
-Updates rule thresholds, severity, remediation text, or enabled status. (Requires `ADMIN` or `REGULATOR`).
-
-### `POST /rules/simulator/run`
-Executes dry-run simulation of a draft rule against sample products without committing to database.
-
----
-
-## 6. Regulatory Reports & Exports (`/reports`)
-
-### `GET /reports/pdf/product/{productId}`
-Downloads court-ready, formal PDF inspection dossier with statutory disclaimer.
-
-### `GET /reports/excel`
-Downloads multi-sheet XLSX spreadsheet of all catalog items and potential violations.
-
-### `GET /reports/csv`
-Downloads flat CSV stream of potential violations.
-
----
-
-## 7. AI Microservice & Operational Monitoring (`/ai/monitoring`)
-
-### `GET /ai/monitoring`
-Returns operational telemetry including FastAPI health, active OCR engine (`tesseract` vs `synthetic_ocr_fallback`), average OCR confidence %, and vision/NLP model details.
-
----
-
-## 8. SIH26006: Maritime Freight Forecasting & Bulk Cargo Procurement (`/freight`)
-
-Base URL: `http://localhost:8080/api/v1/freight`  
-Role Access: Authenticated users (`ADMIN`, `REGULATOR`, `REVIEWER`, `ANALYST`)
-
-### `GET /freight/overview`
-Aggregates macro maritime market telemetry, Baltic Dry indices, monitored East Coast ports, trade routes, active procurement plans, and total cost savings realized.
-- **Response `200 OK`:**
+- **Success Response (200 OK):**
   ```json
   {
-    "marketData": {
-      "bdi": 1820,
-      "bci": 2840,
-      "bpi": 1690,
-      "bsi": 1280,
-      "bhsi": 740,
-      "bdiChangePct": 2.45,
-      "bdiSentiment": "BULLISH",
-      "bunkerIfo380Usd": 485.50,
-      "bunkerVlsfoUsd": 620.00
-    },
-    "totalPorts": 5,
-    "totalRoutes": 5,
-    "totalProcurementPlans": 3,
-    "totalOptimizedSavingsInr": 13962500.0,
-    "monitoredPorts": [...],
-    "activeTradeRoutes": [...],
-    "recentPlans": [...]
+    "success": true,
+    "message": "Vessel optimization completed",
+    "data": {
+      "recommendedVesselClass": "PANAMAX",
+      "alternativeOptions": [
+        {
+          "vesselClass": "PANAMAX",
+          "capacityMT": 75000,
+          "draftMeters": 14.2,
+          "feasible": true,
+          "lighterageRequired": true,
+          "lighterageLocation": "Sandheads / Sagar Island Deep Anchorage",
+          "estimatedFreightPerMT": 17.65,
+          "demurrageRiskDays": 3.0,
+          "totalVoyageCostUSD": 1323750.00,
+          "justification": "Panamax vessel selected. Haldia riverine draft (8.5m) requires partial lighterage at Sandheads deep water anchorage. Lighterage cost added: $4.20/MT."
+        },
+        {
+          "vesselClass": "CAPESIZE",
+          "capacityMT": 180000,
+          "draftMeters": 18.2,
+          "feasible": false,
+          "rejectionReason": "Exceeds Haldia maximum permissible LOA (230m) and Sandheads daughter lighterage capacity limits."
+        }
+      ]
+    }
   }
   ```
 
-### `GET /freight/ports`
-Lists all Indian East Coast discharge ports with max permissible draft, Panamax/Capesize berths, and waiting times.
-- Ports:
-  - `INPRT` (Paradip Port): 14.5m draft, Deepwater bulk terminal
-  - `INVTZ` (Visakhapatnam Port): 14.5m draft, Inner & Outer harbor
-  - `INHLD` (Haldia Dock Complex): 11.0m draft (Restricts Capesize/Panamax)
-  - `INDHM` (Dhamra Port): 18.0m draft (Capesize capable deepwater)
-  - `INENR` (Kamarajar / Ennore Port): 16.0m draft (Bulk coal berth)
+---
 
-### `GET /freight/vessels`
-Lists bulk carrier vessel classes (`CAPESIZE`, `PANAMAX`, `SUPRAMAX`, `HANDYSIZE`) with DWT ranges, typical draft, daily fuel consumption, and cargo suitability.
-
-### `GET /freight/routes`
-Lists international bulk trade corridors:
-- Australia (Hay Point/Gladstone) -> Paradip/Vizag (Coking Coal)
-- Indonesia (Samarinda/Muara Pantai) -> Haldia/Dhamra (Thermal Coal)
-- South Africa (Richards Bay) -> Ennore/Paradip (Steam Coal)
-- Brazil (Tubarao/Ponta da Madeira) -> Dhamra/Paradip (Iron Ore Pellets)
-- Black Sea / Novorossiysk -> Vizag/Paradip (Fertilizers & Minerals)
-
-### `GET /freight/forecasts`
-Retrieves time-series freight rate forecasts (7-day, 14-day, 30-day, 60-day horizons) across vessel classes with 95% confidence intervals and rate trajectory direction (`UPWARD`, `STABLE`, `DOWNWARD`).
-
-### `POST /freight/chartering/optimize`
-Decision-support chartering optimization model. Evaluates cargo quantity, commodity, origin, destination port draft constraints, Baltic forward rate curve, and current market sentiment.
+### 3.4 Spot vs Multi-Voyage COA Comparative Analysis
+- **Endpoint:** `POST /api/v1/freight/compare-contracts`
+- **Access:** Authenticated (`ANALYST`, `ADMIN`)
 - **Request Body:**
   ```json
   {
-    "commodity": "Australian Premium Hard Coking Coal",
-    "quantityTons": 75000.0,
-    "originCountry": "Australia",
-    "destinationPortCode": "INPRT",
-    "fobPriceUsd": 245.0,
-    "targetLaycanStart": "2026-12-01",
-    "targetLaycanEnd": "2026-12-08"
+    "routeCode": "AU-HAY-IN-PAR",
+    "annualCargoQuantityMT": 500000,
+    "voyageCount": 7
   }
   ```
-- **Response `200 OK`:**
+- **Success Response (200 OK):**
   ```json
   {
-    "planReference": "PROC-20261120-PRT-001",
-    "recommendedVesselClass": "PANAMAX",
-    "draftFeasible": true,
-    "charterDecision": "CHARTER_NOW",
-    "decisionRationale": "Panamax vessel draft 13.8m fits Paradip draft limit 14.5m. Forward 14-day freight rate curve indicates 4.2% upward trajectory. Prompt fixture locks in favorable rate USD 24.80/ton.",
-    "fobPriceUsd": 245.0,
-    "freightRateUsdTon": 24.80,
-    "portHandlingUsdTon": 7.50,
-    "totalLandedCostUsdTon": 277.30,
-    "totalLandedCostInrTon": 23015.90,
-    "totalCargoLandedCostInr": 1726192500.0,
-    "estimatedCostSavingsInr": 13962500.0
+    "success": true,
+    "message": "Contract comparison completed",
+    "data": {
+      "spotOption": {
+        "averageRatePerMT": 15.20,
+        "totalAnnualCostUSD": 7600000.00,
+        "volatilityRisk": "HIGH",
+        "marketSpikeExposure": "100%"
+      },
+      "coaOption": {
+        "fixedRatePerMT": 13.95,
+        "totalAnnualCostUSD": 6975000.00,
+        "annualSavingsUSD": 625000.00,
+        "percentageSavings": 8.22,
+        "bunkerEscalationClause": "LSFO 380 +/- $15/MT threshold"
+      },
+      "recommendation": "Contract of Affreightment (COA) is strongly recommended, delivering $625,000 USD (8.22%) annual savings and immunizing steel mill inventory from spot market rate spikes."
+    }
   }
   ```
 
-### `GET /freight/reports/plan/{id}/pdf`
-Generates and downloads a formal procurement and vessel fixture dossier as a court-ready / boardroom PDF document with landed cost waterfall and executive signatures.
+---
 
-### `GET /freight/reports/excel`
-Generates and downloads a comprehensive multi-sheet Excel workbook (`Maritime_Freight_Procurement_Analysis.xlsx`) containing:
-- Sheet 1: Market Telemetry & Baltic Indices
-- Sheet 2: East Coast Ports & Draft Specifications
-- Sheet 3: Forward Freight Forecasts & Rate Curves
-- Sheet 4: Active Procurement Plans & Fixtures
+### 3.5 Bulk Cargo Landed Cost Calculation
+- **Endpoint:** `POST /api/v1/freight/landed-cost`
+- **Access:** Authenticated (`ANALYST`, `ADMIN`)
+- **Request Body:**
+  ```json
+  {
+    "originPort": "Hay Point, Australia",
+    "dischargePort": "Paradip, India",
+    "cargoType": "COKING_COAL",
+    "cargoQuantityMT": 150000,
+    "fobPriceUSDPerMT": 265.00,
+    "bunkerFuelUSDPerMT": 620.00,
+    "vesselClass": "CAPESIZE"
+  }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Landed cost calculated",
+    "data": {
+      "fobCostTotalUSD": 39750000.00,
+      "oceanFreightPerMT": 14.80,
+      "oceanFreightTotalUSD": 2220000.00,
+      "bunkerSurchargeTotalUSD": 284000.00,
+      "portDemurrageEstimatedUSD": 78000.00,
+      "lighterageCostUSD": 0.00,
+      "marineInsuranceUSD": 45000.00,
+      "totalLandedCostUSD": 42377000.00,
+      "landedCostPerMTUSD": 282.51,
+      "landedCostPerMTINR": 23448.33,
+      "exchangeRateUSDINR": 83.00
+    }
+  }
+  ```
 
+---
+
+### 3.6 Export Executive Procurement Report
+- **Endpoint:** `GET /api/v1/freight/reports/export?format=csv` (or `format=pdf`)
+- **Access:** Authenticated (`ANALYST`, `REVIEWER`, `ADMIN`)
+- **Response Header:** `Content-Disposition: attachment; filename="procurement_report.csv"`
+- **Response Content:** Stream of CSV or PDF bytes containing complete voyage and cost breakdown.
+
+---
+
+## 4. Legal Metrology (LMPC) Endpoints (`/api/v1`)
+
+### 4.1 Execute Compliance Label Scan
+- **Endpoint:** `POST /api/v1/scans`
+- **Access:** Authenticated (`REGULATOR`, `ADMIN`)
+- **Request Content:** `multipart/form-data` with `file=@label_image.jpg`
+- **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Packaging scan processed",
+    "data": {
+      "scanId": "scan-89421",
+      "complianceStatus": "NON_COMPLIANT",
+      "totalViolations": 1,
+      "extractedFields": {
+        "manufacturerName": "Patanjali Foods Limited",
+        "mrp": "Rs. 150.00",
+        "netQuantity": "500 g",
+        "unitSalePrice": "Rs. 0.30 per g"
+      },
+      "violations": [
+        {
+          "ruleNumber": "Rule 6(1)(d)",
+          "severity": "CRITICAL",
+          "description": "Missing month and year of manufacture/packing",
+          "penaltySection": "Section 36(1) of Legal Metrology Act, 2009"
+        }
+      ]
+    }
+  }
+  ```
+
+### 4.2 Query Statutory Rules
+- **Endpoint:** `GET /api/v1/rules`
+- **Access:** Public / Authenticated
+- **Success Response (200 OK):** Returns all 8 Legal Metrology Packaging Commodity rules and thresholds.
