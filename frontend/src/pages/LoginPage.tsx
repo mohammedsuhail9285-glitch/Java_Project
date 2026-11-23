@@ -125,10 +125,14 @@ export const LoginPage: React.FC = () => {
     setPasswordLoading(true);
 
     try {
-      await login(username.trim(), password);
-      navigate('/');
+      const loggedInUser = await login(username.trim(), password);
+      if (loggedInUser?.role === 'ANALYST') {
+        navigate('/freight');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
-      let msg = err.response?.data?.message;
+      let msg = err.response?.data?.message || err.response?.data?.error;
       if (!msg) {
         if (!err.response || err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
           msg = 'Unable to connect to authentication server. Please ensure the Spring Boot backend is running on port 8080.';
@@ -183,10 +187,14 @@ export const LoginPage: React.FC = () => {
     setVerifyLoading(true);
 
     try {
-      await loginWithOtp(identifier.trim(), otpCode.trim());
-      navigate('/');
+      const loggedInUser = await loginWithOtp(identifier.trim(), otpCode.trim());
+      if (loggedInUser?.role === 'ANALYST') {
+        navigate('/freight');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Invalid or expired verification code.';
+      const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid or expired verification code.';
       setError(msg);
     } finally {
       setVerifyLoading(false);

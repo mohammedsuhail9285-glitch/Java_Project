@@ -248,6 +248,33 @@ export const DashboardPage: React.FC = () => {
         }
       />
 
+      {/* Primary SIH26006 Problem Statement Banner */}
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-xl p-4 text-white shadow-md border border-blue-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-blue-950 uppercase tracking-wider">
+              SIH26006 Primary Problem Statement
+            </span>
+            <span className="text-[11px] text-blue-200">Ministry of Steel, Govt of India</span>
+          </div>
+          <h2 className="text-sm sm:text-base font-bold text-white">
+            Intelligent Maritime Freight Forecasting & Bulk Cargo Procurement
+          </h2>
+          <p className="text-xs text-blue-200/90 max-w-2xl">
+            14-day Baltic rate forecasting with 95% confidence intervals, nautical port constraints (Draft, LOA, Beam), Sandheads lighterage, and landed cost optimization for East Coast Indian ports.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => navigate('/freight')}
+            className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-blue-950 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+          >
+            <TrendingUp className="w-4 h-4" />
+            Open Freight Command Portal
+          </button>
+        </div>
+      </div>
+
       {/* ROW 1: 5 KEY METRICS (Step 6 / Dashboard Redesign Requirement) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <StatCard

@@ -7,8 +7,8 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (u: string, p: string) => Promise<void>;
-  loginWithOtp: (identifier: string, code: string) => Promise<void>;
+  login: (u: string, p: string) => Promise<User | null>;
+  loginWithOtp: (identifier: string, code: string) => Promise<User | null>;
   loginWithToken: (token: string, user?: User) => Promise<void>;
   logout: () => Promise<void>;
   hasRole: (...roles: Role[]) => boolean;
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = async (u: string, p: string) => {
+  const login = async (u: string, p: string): Promise<User | null> => {
     const resp: any = await authApi.login(u, p);
     const resolvedToken = resp?.accessToken || resp?.token || resp?.data?.accessToken;
     const resolvedUser = resp?.user || resp?.data?.user;
@@ -75,9 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (resolvedUser) {
       localStorage.setItem('user', JSON.stringify(resolvedUser));
     }
+    return resolvedUser;
   };
 
-  const loginWithOtp = async (identifier: string, code: string) => {
+  const loginWithOtp = async (identifier: string, code: string): Promise<User | null> => {
     const resp: any = await authApi.verifyOtp(identifier, code);
     const resolvedToken = resp?.accessToken || resp?.token || resp?.data?.accessToken;
     const resolvedUser = resp?.user || resp?.data?.user;
@@ -90,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (resolvedUser) {
       localStorage.setItem('user', JSON.stringify(resolvedUser));
     }
+    return resolvedUser;
   };
 
   const loginWithToken = async (newToken: string, directUser?: User) => {

@@ -59,18 +59,29 @@ public class DataInitializer implements CommandLineRunner {
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .fullName(fullName)
                 .role(role)
+                .authProvider(com.example.lmchecker.entity.AuthProvider.LOCAL)
+                .emailVerified(true)
+                .accountStatus("ACTIVE")
+                .failedLoginAttempts(0)
+                .lockedUntil(null)
                 .enabled(true)
                 .build();
             userRepository.save(user);
             log.info("Created user '{}' with role {}", username, role);
         } else {
-            // Guarantee fresh password hash matches expected credentials
+            // Guarantee fresh password hash and active status match expected credentials
             user.setPasswordHash(passwordEncoder.encode(rawPassword));
             user.setEmail(email);
             user.setFullName(fullName);
             user.setRole(role);
+            user.setAuthProvider(com.example.lmchecker.entity.AuthProvider.LOCAL);
+            user.setEmailVerified(true);
+            user.setAccountStatus("ACTIVE");
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
             user.setEnabled(true);
             userRepository.save(user);
+            log.info("Updated and activated user '{}' with role {}", username, role);
         }
     }
 
