@@ -34,53 +34,59 @@ The platform is structured as a **Unified Dual-Core Enterprise System**:
 
 ## 3. End-to-End Test Suite Breakdown (38/38 Passing)
 
-All 38 automated test cases executed by Maven Surefire are detailed below:
+All 38 automated test cases executed by Maven Surefire in `mvn test` are distributed across 7 test classes and pass with 0 failures:
 
-### 3.1 Authentication & Security Tests (`AuthSecurityTests.java`) — 8 Tests
-1. `testSeededDemoAccountsAuthentication`: Verifies all 4 demo users (`regulator`, `admin`, `analyst`, `reviewer`) authenticate cleanly with BCrypt matching.
-2. `testAccountLockoutAfterFiveFailedAttempts`: Enforces 5 failed attempts = 15-minute lockout; asserts HTTP 401 with lockout message.
-3. `testUserRegistrationWithViewerDefaultRole`: Verifies new self-registrations receive `VIEWER` role and require email verification.
-4. `testEmailVerificationWorkflow`: Verifies 24-hour verification token generation and account activation upon confirmation.
-5. `testPasswordResetWorkflow`: Verifies one-time password reset token issuance and password update.
-6. `testRateLimiterProtection`: Verifies burst protection against rapid credential attacks.
-7. `testJwtTokenExpirationAndValidation`: Verifies HMAC-SHA256 signature and expiration enforcement.
-8. `testAdminRolePromotionEndpoint`: Verifies `PATCH /api/v1/users/{id}/role` can only be invoked by `ADMIN` users.
+### 3.1 Authentication & Security Architecture (`AuthSecurityTests.java` — 3 Tests)
+1. `testAllFourDemoAccountsCanLogin`: Validates that all 4 demo users (`admin`, `regulator`, `reviewer`, `analyst`) successfully authenticate with their seeded credentials and receive signed HMAC-SHA256 JWT tokens.
+2. `testLoginSuccessAndRbacAccess`: Validates role claims in JWT (`ADMIN`, `REGULATOR`, `REVIEWER`, `ANALYST`), verifies 401 on bad passwords, enforces 401 on unauthenticated `/api/v1/auth/me`, verifies 200 on authenticated identity retrieval, and verifies RBAC boundary (e.g. `/api/v1/users` is accessible to `ADMIN` but returns 403 Forbidden to `REGULATOR`).
+3. `testRegistrationEmailVerificationAndLockout`: Enforces password complexity rules (rejects weak passwords), registers new accounts with `VIEWER` role and `emailVerified=false`, rejects duplicate email registration, verifies account activation via single-use email verification tokens, enforces account lockout after 5 consecutive failed login attempts, and executes the forgot-password token flow.
 
-### 3.2 Freight Intelligence & Optimization Tests (`FreightOptimizationTests.java`) — 12 Tests
-1. `testVesselPhysicalCompatibilityFilter`: Verifies Capesize rejection at ports with draft < 17m.
-2. `testHaldiaLighterageRecommendation`: Verifies Sandheads/Sagar transshipment is recommended for Haldia with lighterage cost breakdown.
-3. `testSpotVsCoaEconomicComparison`: Verifies multi-voyage COA achieves 5-12% freight rate discount relative to volatile spot chartering.
-4. `testPortDemurrageCalculation`: Verifies waiting days $\times$ daily demurrage rate is added to total voyage cost.
-5. `testHoltWintersFourteenDayForecast`: Verifies 14 daily forecast points with monotonic variance widening in confidence intervals.
-6. `testConfidenceIntervalUpperLowerBounds`: Verifies $Lower \le Forecast \le Upper$ for every predicted day.
-7. `testLandedCostFullBreakdown`: Verifies $FOB + Freight + Bunker + Demurrage + Lighterage + Insurance = LandedCost$.
-8. `testExplainableRecommendationGeneration`: Verifies non-empty AI justification string explaining nautical choices.
-9. `testSensitivityAnalysisVaryingBunkerPrices`: Verifies landed cost increases linearly with bunker fuel escalation.
-10. `testTradeRouteDistanceAndVoyageDays`: Verifies steaming days calculation at 14 knots speed: $Days = \frac{Distance}{14 \times 24}$.
-11. `testCargoQuantityVsVesselDwtUtilization`: Verifies utilization efficiency calculation: $Utilization = \frac{Cargo}{DWT}$.
-12. `testExecutiveReportGenerationCsv`: Verifies CSV string generation containing all freight planning columns.
+### 3.2 Advanced Authentication Flows & Providers (`AuthNewFlowTests.java` — 9 Tests)
+1. `testAuthConfigEndpoint`: Verifies `GET /api/v1/auth/config` returns dynamic authentication configuration, delivery modes, and demo indicators.
+2. `testOtpRequestAndVerifyHappyPath`: Verifies 6-digit numeric OTP generation, delivery hint in dev profile, single-use consumption upon verification, and JWT issuance.
+3. `testOtpVerifyWrongCode`: Asserts rejection of incorrect OTP codes with remaining attempt countdown.
+4. `testOtpVerifyExpiredCode`: Asserts rejection of expired OTP tokens past their 5-minute TTL.
+5. `testOtpRequestUnregisteredIdentifier`: Enforces enumeration-safe generic response for non-existent email addresses.
+6. `testOtpRequestMobileNumber`: Validates clear operational guidance when an SMS provider gateway is unconfigured.
+7. `testGoogleOAuthNewUserRegistration`: Simulates Google OpenID Connect callback, auto-provisions user with `VIEWER` role, marks `authProvider=GOOGLE`, and logs audit trail.
+8. `testGoogleOAuthExistingUserLogin`: Validates returning Google OAuth2 authentication matching existing email identities.
+9. `testOtpRateLimitExceeded`: Enforces sliding-window rate limiting on repeated OTP requests to prevent SMS/email spamming.
 
-### 3.3 Rule Engine & Product Compliance Tests (`RuleEngineTests.java`) — 10 Tests
-1. `testRule5PrincipalDisplayAreaCalculation`: Verifies minimum display area calculation according to package volume.
-2. `testRule7MandatoryDeclarationsVerification`: Verifies detection of missing MRP, Net Quantity, Expiry, or Manufacturer details.
-3. `testRule8UnitSalePriceCalculation`: Verifies unit sale price formatting (e.g., `Rs. 0.45 per g`).
-4. `testRule9NetQuantityToleranceCheck`: Verifies maximum permissible error (MPE) tolerances under Schedule II.
-5. `testRule13ManufacturerImporterDetails`: Verifies complete address validation for domestic vs imported packaged goods.
-6. `testECommerceRuleVerification`: Verifies digital marketplace statutory declaration requirements.
-7. `testSeverityScoringAlgorithm`: Verifies critical vs major vs minor violation weighting.
-8. `testEvidenceCroppingCoordinates`: Verifies bounding box coordinates for statutory declaration image crops.
-9. `testScanHistoryRetrieval`: Verifies user scan history query filtering by date and compliance status.
-10. `testAuditLogCreation`: Verifies immutable audit entry generation upon scan completion.
+### 3.3 Freight Optimization & Maritime Logistics (`FreightOptimizationTests.java` — 5 Tests)
+1. `testPortDraftConstraints`: Validates nautical physics and draft restrictions: Haldia (11.0m max draft) rejects Capesize vessels (>17m), while Paradip (14.5m draft) accommodates Panamax vessels.
+2. `testHaldiaProcurementOptimization`: Evaluates Indonesian Thermal Coal (42,000 MT) to Haldia; verifies selection of Handysize vessel under draft feasibility, landed cost calculation > $95 FOB, and positive INR cost savings.
+3. `testParadipCokingCoalOptimization`: Evaluates Australian Premium Hard Coking Coal (75,000 MT) to Paradip; verifies Panamax vessel recommendation, draft feasibility, decision rationale, and landed cost in INR/ton.
+4. `testFreightOverview`: Validates aggregation of Baltic Dry Index (BDI) market telemetry, East Coast Indian ports (>= 5), international trade routes (>= 5), and cumulative cost savings.
+5. `testReportGeneration`: Validates binary document generation, ensuring PDF dossiers contain valid `%PDF` magic bytes and Excel workbooks contain valid `PK` ZIP archive headers.
 
-### 3.4 Integration & Controller Tests (`ApiControllerTests.java`) — 8 Tests
-1. `testHealthCheckEndpoint`: Verifies `GET /actuator/health` returns `UP`.
-2. `testFreightMarketDataEndpoint`: Verifies `GET /api/v1/freight/market-data` returns Baltic rates and historical series.
-3. `testFreightForecastEndpoint`: Verifies `GET /api/v1/freight/forecast` returns 14-day projections with confidence intervals.
-4. `testVesselRecommendationsEndpoint`: Verifies `POST /api/v1/freight/optimize-vessel` returns ranked vessel options.
-5. `testProcurementPlanEndpoint`: Verifies `POST /api/v1/freight/procurement-plan` creates and stores a procurement scenario.
-6. `testExportReportEndpoint`: Verifies `GET /api/v1/freight/reports/export` returns downloadable CSV/PDF media types.
-7. `testUnauthenticatedAccessRejected`: Verifies protected endpoints return HTTP 401 Unauthorized when missing Bearer token.
-8. `testForbiddenRoleAccessRejected`: Verifies `VIEWER` role receives HTTP 403 Forbidden when attempting administrative mutations.
+### 3.4 Regulatory Rule Engine & Compliance (`RuleEngineTests.java` — 12 Tests)
+1. `testFieldPresence`: Verifies detection of missing mandatory statutory declarations on packaging.
+2. `testPriceOverchargeMismatch`: Verifies detection when digital e-commerce listing price exceeds the physical declared label MRP.
+3. `testUnitValidity`: Verifies legal units of measurement according to Legal Metrology Rules (e.g. g, kg, ml, l).
+4. `testEndToEndRuleExecution`: Executes full statutory rule pipeline across multi-field product contexts.
+5. `testListingOmissionMissingMrp`: Flags violations when online listing omits mandatory retail price.
+6. `testListingOmissionMissingNetQuantity`: Flags violations when online listing omits mandatory net quantity.
+7. `testListingOmissionFullyCompliant`: Validates clean compliance status when all required e-commerce declarations are present.
+8. `testDatePresenceMissingManufactureDate`: Flags omission of date of manufacture or packaging.
+9. `testDatePresencePresent`: Validates acceptance of compliant manufacturing date formats (MM/YYYY).
+10. `testListingMrpDifferentFromLabelMrp`: Flags discrepancy between physical label MRP and digital listing MRP.
+11. `testQuantityGramUnitNormalization`: Verifies unit normalization and Maximum Permissible Error (MPE) calculations.
+12. `testFullyCompliantProduct`: Verifies overall compliance scoring >= 90 and `PASSED_AUTOMATED_CHECKS` status.
+
+### 3.5 End-to-End Demo Scenarios (`DemoScenarioEndToEndTest.java` — 3 Tests)
+1. `testScenario1_CompliantAtta`: Evaluates packaged flour with full statutory declarations -> 0 violations, score >= 90.
+2. `testScenario2_MissingMrpDetergent`: Evaluates detergent label lacking MRP -> critical violation flagged.
+3. `testScenario3_PriceMismatchHoney`: Evaluates online honey listing priced higher than packaging label MRP -> overcharge violation flagged.
+
+### 3.6 Data Ingestion & Storage Pipeline (`IngestionTests.java` — 5 Tests)
+1. `testMockProductDataSource`: Verifies simulated streaming feed of e-commerce product listings.
+2. `testFileStorageService`: Verifies local filesystem storage of label images and evidence crops.
+3. `testManualProductIngestion`: Verifies single-product manual registration via REST API.
+4. `testCsvBatchIngestion`: Verifies bulk batch upload and parsing of CSV product catalogs.
+5. `testSimulatedCrawlBatchIngestion`: Verifies background crawler queue ingestion and deduplication.
+
+### 3.7 Application Context Bootstrapping (`LmCheckerApplicationTests.java` — 1 Test)
+1. `contextLoads`: Verifies Spring Boot 3.3.4 container boots without configuration or bean dependency errors.
 
 ---
 
