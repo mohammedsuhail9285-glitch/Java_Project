@@ -29,7 +29,8 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException exception) throws IOException, ServletException {
         log.error("OAuth2 authentication failure: {}", exception.getMessage());
 
         Throwable cause = exception;
@@ -43,7 +44,8 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         String exMsg = exception != null ? exception.getMessage() : "";
         if (exMsg != null && exMsg.contains("401 Unauthorized")) {
             userFriendlyMessage = "Google authentication failed: 401 Unauthorized. The configured Google Client Secret is invalid, expired, or mismatched with Client ID in Google Cloud Console.";
-            log.error("CRITICAL OAUTH CONFIGURATION ERROR: Google rejected the OAuth 2.0 token exchange with 401 Unauthorized. Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Google Cloud Console (APIs & Services > Credentials). Ensure the Client Secret is actively enabled and matches the Web Application Client ID.");
+            log.error(
+                    "CRITICAL OAUTH CONFIGURATION ERROR: Google rejected the OAuth 2.0 token exchange with 401 Unauthorized. Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Google Cloud Console (APIs & Services > Credentials). Ensure the Client Secret is actively enabled and matches the Web Application Client ID.");
         } else if (exMsg != null && !exMsg.isBlank()) {
             userFriendlyMessage = "Google authentication failed: " + exMsg;
         }
@@ -51,8 +53,8 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         cookieAuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendLoginUrl)
-            .queryParam("error", userFriendlyMessage)
-            .build().toUriString();
+                .queryParam("error", userFriendlyMessage)
+                .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

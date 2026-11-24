@@ -19,6 +19,8 @@ if exist "C:\Program Files\Java\jdk-21.0.10\bin\java.exe" (
 if not exist "%~dp0data" mkdir "%~dp0data"
 if not exist "%~dp0storage\uploads" mkdir "%~dp0storage\uploads"
 set "DB_FILE_PATH=%~dp0data\lmchecker"
+del /f /q "%~dp0data\*.lock.db" >nul 2>&1
+del /f /q "%~dp0backend\data\*.lock.db" >nul 2>&1
 
 :: 3. Clear existing orphaned processes holding service ports
 echo [Pre-flight] Verifying port availability...

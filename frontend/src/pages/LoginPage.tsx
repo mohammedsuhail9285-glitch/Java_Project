@@ -45,7 +45,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 export const LoginPage: React.FC = () => {
   const { login, loginWithOtp } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Active sign-in tab
   const [activeTab, setActiveTab] = useState<'password' | 'otp'>('password');
@@ -113,9 +113,12 @@ export const LoginPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [resendCooldown]);
 
-  // Clear error and clean URL error query param
+  // Clear error and clean URL error query param in React Router and address bar
   const clearError = () => {
     setError(null);
+    if (searchParams.get('error')) {
+      setSearchParams({}, { replace: true });
+    }
     if (window.location.search) {
       window.history.replaceState({}, '', window.location.pathname);
     }
@@ -217,9 +220,9 @@ export const LoginPage: React.FC = () => {
 
   // Google OAuth button handler
   const handleGoogleSignIn = () => {
-    setError(null);
+    clearError();
     if (authConfig && !authConfig.googleOAuthEnabled) {
-      setError('Google Sign-In is not currently configured on this server. Contact administrator to enable Google OAuth2 credentials.');
+      setError('Google Sign-In is not currently enabled. Please use the pre-seeded demo evaluation accounts below (such as Regulator or Analyst) to sign in immediately.');
       return;
     }
     setGoogleLoading(true);
@@ -301,10 +304,22 @@ export const LoginPage: React.FC = () => {
 
           {/* Global Error Banner */}
           {error && (
-            <div className="flex items-start gap-2.5 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-300">
+            <div className="flex items-start gap-2.5 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-300">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
               <div className="flex-1 leading-normal">
-                {error}
+                <div>{error}</div>
+                {error.includes('Google authentication failed') && (
+                  <div className="mt-2 pt-2 border-t border-rose-200 dark:border-rose-800 text-[11px] text-rose-700 dark:text-rose-400 flex items-center justify-between">
+                    <span>Use direct demo credentials below to sign in without Google:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDemoSelect('regulator', 'Regulator@123')}
+                      className="ml-2 px-2 py-0.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                    >
+                      Fill Demo Credentials
+                    </button>
+                  </div>
+                )}
                 {unverifiedEmail && (
                   <div className="pt-1.5 flex items-center gap-2">
                     <button
@@ -399,7 +414,10 @@ export const LoginPage: React.FC = () => {
                     type="text"
                     required
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (error) clearError();
+                    }}
                     className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-700 dark:text-slate-100"
                     placeholder="e.g. regulator, admin, or officer@company.com"
                     autoComplete="username"
@@ -425,7 +443,10 @@ export const LoginPage: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) clearError();
+                    }}
                     className="w-full pl-9 pr-9 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-700 dark:text-slate-100"
                     placeholder="Enter password"
                     autoComplete="current-password"
