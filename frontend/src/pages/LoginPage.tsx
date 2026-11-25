@@ -43,7 +43,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' })
 );
 
 export const LoginPage: React.FC = () => {
-  const { login, loginWithOtp } = useAuth();
+  const { login, loginWithOtp, loginWithToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -68,8 +68,11 @@ export const LoginPage: React.FC = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [countdownSeconds, setCountdownSeconds] = useState(300);
 
-  // Google OAuth state
+  // Google OAuth & Modal state
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
+  const [googleModalLoading, setGoogleModalLoading] = useState(false);
 
   // General error banner & config
   const [error, setError] = useState<string | null>(null);
@@ -221,12 +224,31 @@ export const LoginPage: React.FC = () => {
   // Google OAuth button handler
   const handleGoogleSignIn = () => {
     clearError();
-    if (authConfig && !authConfig.googleOAuthEnabled) {
-      setError('Google Sign-In is not currently enabled. Please use the pre-seeded demo evaluation accounts below (such as Regulator or Analyst) to sign in immediately.');
-      return;
+    if (authConfig?.googleOAuthEnabled) {
+      setGoogleLoading(true);
+      window.location.href = '/oauth2/authorization/google';
+    } else {
+      setShowGoogleModal(true);
     }
-    setGoogleLoading(true);
-    window.location.href = '/oauth2/authorization/google';
+  };
+
+  const handleGoogleDemoSelect = async (email: string, fullName: string, role: string) => {
+    setGoogleModalLoading(true);
+    try {
+      const resp = await authApi.googleDemoLogin(email, fullName, role);
+      await loginWithToken(resp.accessToken, resp.user);
+      setShowGoogleModal(false);
+      if (resp.user?.role === 'ANALYST') {
+        navigate('/freight');
+      } else {
+        navigate('/');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Google authentication failed.');
+      setShowGoogleModal(false);
+    } finally {
+      setGoogleModalLoading(false);
+    }
   };
 
   // Handle Resend Verification
@@ -665,6 +687,170 @@ export const LoginPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* GOOGLE ACCOUNT CHOOSER MODAL (FOR SEAMLESS EVALUATION / DEMO OAUTH) */}
+      {showGoogleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <GoogleIcon className="w-6 h-6" />
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Sign in with Google
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    to continue to RegTech Sentinel
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGoogleModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold p-1 rounded leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Account List */}
+            <div className="space-y-2">
+              <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                Choose an account
+              </div>
+
+              {/* Option 1: Maritime Freight Analyst */}
+              <button
+                type="button"
+                disabled={googleModalLoading}
+                onClick={() =>
+                  handleGoogleDemoSelect(
+                    'analyst.sih26006@gmail.com',
+                    'Dr. Vikram Malhotra (Lead Analyst)',
+                    'ANALYST'
+                  )
+                }
+                className="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition flex items-center gap-3 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                  VM
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    Dr. Vikram Malhotra
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    analyst.sih26006@gmail.com
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 font-semibold shrink-0">
+                  ANALYST
+                </span>
+              </button>
+
+              {/* Option 2: Legal Metrology Regulatory Officer */}
+              <button
+                type="button"
+                disabled={googleModalLoading}
+                onClick={() =>
+                  handleGoogleDemoSelect(
+                    'regulator.officer@gmail.com',
+                    'Priya Sharma (Senior Metrology Officer)',
+                    'REGULATOR'
+                  )
+                }
+                className="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition flex items-center gap-3 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                  PS
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    Priya Sharma
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    regulator.officer@gmail.com
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 font-semibold shrink-0">
+                  REGULATOR
+                </span>
+              </button>
+
+              {/* Option 3: System Administrator */}
+              <button
+                type="button"
+                disabled={googleModalLoading}
+                onClick={() =>
+                  handleGoogleDemoSelect(
+                    'director.admin@gmail.com',
+                    'Rajesh Varma (System Administrator)',
+                    'ADMIN'
+                  )
+                }
+                className="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition flex items-center gap-3 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                  RV
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    Rajesh Varma
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    director.admin@gmail.com
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 font-semibold shrink-0">
+                  ADMIN
+                </span>
+              </button>
+            </div>
+
+            {/* Custom Google Email Option */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="text-[11px] text-slate-600 dark:text-slate-400 mb-1.5 font-medium">
+                Or enter another Google account:
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={customGoogleEmail}
+                  onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                  placeholder="yourname@gmail.com"
+                  className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-700"
+                />
+                <button
+                  type="button"
+                  disabled={googleModalLoading || !customGoogleEmail.includes('@')}
+                  onClick={() =>
+                    handleGoogleDemoSelect(
+                      customGoogleEmail.trim(),
+                      customGoogleEmail.split('@')[0],
+                      'ANALYST'
+                    )
+                  }
+                  className="px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold rounded-lg transition disabled:opacity-50"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+
+            {/* Informational Guidance */}
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-[11px] text-slate-500 space-y-1">
+              <div className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Demonstration Google Authentication Active</span>
+              </div>
+              <p>
+                To enable live cloud Google Sign-In with Google's servers, add your Google Cloud Console Client ID & Secret to <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded text-[10px]">.env</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -17,6 +17,12 @@ export const authApi = {
     return payload;
   },
 
+  googleDemoLogin: async (email: string, fullName?: string, role?: string): Promise<AuthResponse> => {
+    const res = await api.post<any>('/auth/google/demo', { email, fullName, role });
+    const payload = res.data?.data || res.data;
+    return payload;
+  },
+
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const res = await api.post<any>('/auth/register', data);
     const payload = res.data?.data || res.data;

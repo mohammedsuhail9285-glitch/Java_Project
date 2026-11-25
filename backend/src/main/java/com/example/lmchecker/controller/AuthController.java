@@ -58,6 +58,23 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Login successful", loginResponse));
     }
 
+    @Operation(summary = "Google OAuth demonstration authentication")
+    @PostMapping("/google/demo")
+    public ResponseEntity<ApiResponse<LoginResponse>> googleDemoLogin(
+            @RequestBody GoogleDemoLoginRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response) {
+        com.example.lmchecker.entity.Role role = null;
+        if (request.getRole() != null && !request.getRole().isBlank()) {
+            try {
+                role = com.example.lmchecker.entity.Role.valueOf(request.getRole().trim().toUpperCase());
+            } catch (Exception ignored) {}
+        }
+        LoginResponse loginResponse = authService.authenticateWithGoogleDemo(request.getEmail(), request.getFullName(), role, httpRequest);
+        setAccessTokenCookie(response, loginResponse.getAccessToken());
+        return ResponseEntity.ok(ApiResponse.ok("Google authentication successful", loginResponse));
+    }
+
     @Operation(summary = "New user account registration")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserDto>> register(
