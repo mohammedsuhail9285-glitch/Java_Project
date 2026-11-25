@@ -18,6 +18,11 @@ storage/uploads/
 *.tmp
 __pycache__/
 *.pyc
+.env
+*.env
+!.env.example
+!backend/.env.example
+!frontend/.env.example
 
 # IDE & OS
 .idea/

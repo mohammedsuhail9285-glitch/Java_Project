@@ -54,8 +54,6 @@ public class AuthService {
     private final AuditLogService auditLogService;
     private final AccountNotificationService notificationService;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserRepository userRepository, UserMapper userMapper, AuditLogService auditLogService) {
-
     public AuthService(
             AuthenticationManager authenticationManager,
             JwtUtils jwtUtils,
@@ -247,7 +245,8 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse authenticateWithGoogleDemo(String email, String fullName, Role preferredRole, HttpServletRequest httpRequest) {
+    public LoginResponse authenticateWithGoogleDemo(String email, String fullName, Role preferredRole,
+            HttpServletRequest httpRequest) {
         if (email == null || email.isBlank()) {
             throw new BadRequestException("Google email address is required.");
         }
@@ -265,7 +264,8 @@ public class AuthService {
             }
             userRepository.save(user);
             log.info("Google sign-in for existing user '{}' (Role: {})", user.getUsername(), user.getRole());
-            auditLogService.logAction("LOGIN_GOOGLE", "USER", user.getId().toString(), null, "Role: " + user.getRole() + ", Provider: GOOGLE", httpRequest);
+            auditLogService.logAction("LOGIN_GOOGLE", "USER", user.getId().toString(), null,
+                    "Role: " + user.getRole() + ", Provider: GOOGLE", httpRequest);
         } else {
             String baseUsername = normalizedEmail.split("@")[0].replaceAll("[^a-zA-Z0-9_]", "_").toLowerCase();
             String username = baseUsername;
@@ -275,22 +275,24 @@ public class AuthService {
             }
 
             user = User.builder()
-                .username(username)
-                .email(normalizedEmail)
-                .fullName(fullName != null && !fullName.isBlank() ? fullName : username)
-                .role(role)
-                .authProvider(AuthProvider.GOOGLE)
-                .providerId("google-demo-" + UUID.randomUUID())
-                .emailVerified(true)
-                .accountStatus("ACTIVE")
-                .enabled(true)
-                .build();
+                    .username(username)
+                    .email(normalizedEmail)
+                    .fullName(fullName != null && !fullName.isBlank() ? fullName : username)
+                    .role(role)
+                    .authProvider(AuthProvider.GOOGLE)
+                    .providerId("google-demo-" + UUID.randomUUID())
+                    .emailVerified(true)
+                    .accountStatus("ACTIVE")
+                    .enabled(true)
+                    .build();
             user = userRepository.save(user);
             log.info("Registered new user '{}' via Google authentication with role {}", username, role);
-            auditLogService.logAction("REGISTER_VIA_GOOGLE", "USER", user.getId().toString(), null, "Role: " + user.getRole() + ", Provider: GOOGLE", httpRequest);
+            auditLogService.logAction("REGISTER_VIA_GOOGLE", "USER", user.getId().toString(), null,
+                    "Role: " + user.getRole() + ", Provider: GOOGLE", httpRequest);
         }
 
-        String jwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(), jwtUtils.getJwtExpirationMs());
+        String jwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(),
+                jwtUtils.getJwtExpirationMs());
         return new LoginResponse(jwt, jwtUtils.getJwtExpirationMs(), userMapper.toDto(user));
     }
 
