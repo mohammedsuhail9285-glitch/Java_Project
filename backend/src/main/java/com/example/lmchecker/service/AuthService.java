@@ -1,6 +1,10 @@
 package com.example.lmchecker.service;
 
 import com.example.lmchecker.audit.AuditLogService;
+import com.example.lmchecker.dto.LoginRequest;
+import com.example.lmchecker.dto.LoginResponse;
+import com.example.lmchecker.dto.UserDto;
+import com.example.lmchecker.entity.User;
 import com.example.lmchecker.dto.*;
 import com.example.lmchecker.entity.*;
 import com.example.lmchecker.exception.BadRequestException;
@@ -36,9 +40,10 @@ public class AuthService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int LOCKOUT_MINUTES = 15;
 
-    // Minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 digit, 1 special character
-    private static final Pattern PASSWORD_STRENGTH_PATTERN =
-            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,100}$");
+    // Minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 digit, 1 special
+    // character
+    private static final Pattern PASSWORD_STRENGTH_PATTERN = Pattern
+            .compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,100}$");
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
@@ -48,6 +53,8 @@ public class AuthService {
     private final UserMapper userMapper;
     private final AuditLogService auditLogService;
     private final AccountNotificationService notificationService;
+
+    public AuthService(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserRepository userRepository, UserMapper userMapper, AuditLogService auditLogService) {
 
     public AuthService(
             AuthenticationManager authenticationManager,
@@ -86,6 +93,7 @@ public class AuthService {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
                 new UsernamePasswordAuthenticationToken(identifier, request.getPassword())
             );
 
@@ -105,6 +113,7 @@ public class AuthService {
             }
 
             UserDto userDto = userMapper.toDto(user);
+
             auditLogService.logAction("LOGIN", "USER", user.getId().toString(), null, "Role: " + user.getRole(), httpRequest);
 
             return new LoginResponse(jwt, jwtUtils.getJwtExpirationMs(), userDto);
@@ -133,6 +142,7 @@ public class AuthService {
         } catch (UnauthorizedException e) {
             throw e;
         } catch (Exception e) {
+            throw new UnauthorizedException("Invalid username/email or password");
             log.error("Authentication failed: {}", e.getMessage());
             throw new UnauthorizedException("Invalid username/email or password.");
         }
@@ -158,7 +168,8 @@ public class AuthService {
             throw new BadRequestException("Passwords do not match.");
         }
         if (!PASSWORD_STRENGTH_PATTERN.matcher(password).matches()) {
-            throw new BadRequestException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+            throw new BadRequestException(
+                    "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
         if (userRepository.existsByEmail(email)) {
             throw new BadRequestException("An account with this email address is already registered.");
@@ -190,11 +201,13 @@ public class AuthService {
 
         // Generate secure 24-hour single-use email verification token
         String tokenStr = UUID.randomUUID().toString();
-        SecurityToken token = new SecurityToken(tokenStr, user, TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusHours(24));
+        SecurityToken token = new SecurityToken(tokenStr, user, TokenType.EMAIL_VERIFICATION,
+                LocalDateTime.now().plusHours(24));
         securityTokenRepository.save(token);
 
         notificationService.sendVerificationEmail(user.getEmail(), user.getFullName(), tokenStr);
-        auditLogService.logAction("REGISTER_PUBLIC", "USER", user.getId().toString(), null, "Role: VIEWER, Email: " + user.getEmail(), httpRequest);
+        auditLogService.logAction("REGISTER_PUBLIC", "USER", user.getId().toString(), null,
+                "Role: VIEWER, Email: " + user.getEmail(), httpRequest);
 
         log.info("Public user registered: username={}, email={}, role=VIEWER", user.getUsername(), user.getEmail());
         return userMapper.toDto(user);
@@ -206,11 +219,13 @@ public class AuthService {
             throw new BadRequestException("Verification token is required.");
         }
 
-        SecurityToken token = securityTokenRepository.findByTokenAndTokenType(tokenStr.trim(), TokenType.EMAIL_VERIFICATION)
+        SecurityToken token = securityTokenRepository
+                .findByTokenAndTokenType(tokenStr.trim(), TokenType.EMAIL_VERIFICATION)
                 .orElseThrow(() -> new BadRequestException("Verification link is invalid or has already been used."));
 
         if (!token.isValid()) {
-            throw new BadRequestException("Verification link is expired or has already been used. Please request a new one.");
+            throw new BadRequestException(
+                    "Verification link is expired or has already been used. Please request a new one.");
         }
 
         User user = token.getUser();
@@ -221,11 +236,13 @@ public class AuthService {
         token.setConsumed(true);
         securityTokenRepository.save(token);
 
-        auditLogService.logAction("VERIFY_EMAIL", "USER", user.getId().toString(), null, "Email verified: " + user.getEmail(), httpRequest);
+        auditLogService.logAction("VERIFY_EMAIL", "USER", user.getId().toString(), null,
+                "Email verified: " + user.getEmail(), httpRequest);
         log.info("Email verified successfully for user '{}'", user.getUsername());
 
         // Issue JWT token so user is automatically authenticated upon verification
-        String jwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(), jwtUtils.getJwtExpirationMs());
+        String jwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(),
+                jwtUtils.getJwtExpirationMs());
         return new LoginResponse(jwt, jwtUtils.getJwtExpirationMs(), userMapper.toDto(user));
     }
 
@@ -290,7 +307,8 @@ public class AuthService {
             if (!user.isEmailVerified()) {
                 securityTokenRepository.invalidateTokensForUser(user, TokenType.EMAIL_VERIFICATION);
                 String tokenStr = UUID.randomUUID().toString();
-                SecurityToken token = new SecurityToken(tokenStr, user, TokenType.EMAIL_VERIFICATION, LocalDateTime.now().plusHours(24));
+                SecurityToken token = new SecurityToken(tokenStr, user, TokenType.EMAIL_VERIFICATION,
+                        LocalDateTime.now().plusHours(24));
                 securityTokenRepository.save(token);
                 notificationService.sendVerificationEmail(user.getEmail(), user.getFullName(), tokenStr);
                 log.info("Resent verification email to '{}'", user.getEmail());
@@ -313,7 +331,8 @@ public class AuthService {
             User user = userOpt.get();
             securityTokenRepository.invalidateTokensForUser(user, TokenType.PASSWORD_RESET);
             String tokenStr = UUID.randomUUID().toString();
-            SecurityToken token = new SecurityToken(tokenStr, user, TokenType.PASSWORD_RESET, LocalDateTime.now().plusHours(1));
+            SecurityToken token = new SecurityToken(tokenStr, user, TokenType.PASSWORD_RESET,
+                    LocalDateTime.now().plusHours(1));
             securityTokenRepository.save(token);
             notificationService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), tokenStr);
             log.info("Generated password reset token for '{}'", user.getEmail());
@@ -336,14 +355,16 @@ public class AuthService {
             throw new BadRequestException("Passwords do not match.");
         }
         if (!PASSWORD_STRENGTH_PATTERN.matcher(newPassword).matches()) {
-            throw new BadRequestException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+            throw new BadRequestException(
+                    "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
 
         SecurityToken token = securityTokenRepository.findByTokenAndTokenType(tokenStr, TokenType.PASSWORD_RESET)
                 .orElseThrow(() -> new BadRequestException("Password reset link is invalid or has already been used."));
 
         if (!token.isValid()) {
-            throw new BadRequestException("Password reset link has expired or has already been used. Please request a new one.");
+            throw new BadRequestException(
+                    "Password reset link has expired or has already been used. Please request a new one.");
         }
 
         User user = token.getUser();
@@ -356,7 +377,8 @@ public class AuthService {
         token.setConsumed(true);
         securityTokenRepository.save(token);
 
-        auditLogService.logAction("RESET_PASSWORD", "USER", user.getId().toString(), null, "Password reset via token", httpRequest);
+        auditLogService.logAction("RESET_PASSWORD", "USER", user.getId().toString(), null, "Password reset via token",
+                httpRequest);
         log.info("Password successfully reset for user '{}'", user.getUsername());
 
         return "Password has been successfully updated. You may now log in with your new credentials.";
@@ -376,13 +398,15 @@ public class AuthService {
             throw new BadRequestException("New password and confirmation do not match.");
         }
         if (!PASSWORD_STRENGTH_PATTERN.matcher(newPassword).matches()) {
-            throw new BadRequestException("New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+            throw new BadRequestException(
+                    "New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        auditLogService.logAction("CHANGE_PASSWORD", "USER", user.getId().toString(), null, "Self password change", httpRequest);
+        auditLogService.logAction("CHANGE_PASSWORD", "USER", user.getId().toString(), null, "Self password change",
+                httpRequest);
         return "Password successfully updated.";
     }
 
@@ -397,7 +421,8 @@ public class AuthService {
         }
         user = userRepository.save(user);
 
-        auditLogService.logAction("UPDATE_PROFILE", "USER", user.getId().toString(), null, "Profile updated", httpRequest);
+        auditLogService.logAction("UPDATE_PROFILE", "USER", user.getId().toString(), null, "Profile updated",
+                httpRequest);
         return userMapper.toDto(user);
     }
 
@@ -408,9 +433,10 @@ public class AuthService {
 
         String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UnauthorizedException("User not found"));
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
 
-        String newJwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(), jwtUtils.getJwtExpirationMs());
+        String newJwt = jwtUtils.generateTokenFromUsernameAndRole(user.getUsername(), user.getRole().name(),
+                jwtUtils.getJwtExpirationMs());
         return new LoginResponse(newJwt, jwtUtils.getJwtExpirationMs(), userMapper.toDto(user));
     }
 
@@ -421,10 +447,15 @@ public class AuthService {
     private User getCurrentAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
+            throw new UnauthorizedException("Not authenticated");
             throw new UnauthorizedException("User session is not authenticated.");
         }
 
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+
+        return userMapper.toDto(user);
         return userRepository.findById(principal.getId())
-            .orElseThrow(() -> new UnauthorizedException("Authenticated user record not found."));
+                .orElseThrow(() -> new UnauthorizedException("Authenticated user record not found."));
     }
 }
