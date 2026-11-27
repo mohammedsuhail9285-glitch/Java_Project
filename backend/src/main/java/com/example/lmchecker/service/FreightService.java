@@ -264,9 +264,10 @@ public class FreightService {
                         : (lighterageRequired ? "Draft exceeds channel limit; Sagar/Sandheads lighterage protocol engaged." : "Dimensions exceed dock limits."));
 
         // 8. Persist Plan in Database
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         String planRef = "PROC-" + LocalDate.now().getYear() + "-" +
                 (request.getCommodity() != null && request.getCommodity().toLowerCase().contains("coking") ? "CC" : "BC") +
-                "-" + destPort.getPortCode() + String.format("%02d", new Random().nextInt(90) + 10);
+                "-" + destPort.getPortCode() + "-" + uniqueSuffix;
 
         ProcurementPlan plan = new ProcurementPlan();
         plan.setPlanReference(planRef);

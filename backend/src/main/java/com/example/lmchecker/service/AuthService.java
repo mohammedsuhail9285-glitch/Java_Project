@@ -91,7 +91,6 @@ public class AuthService {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
                 new UsernamePasswordAuthenticationToken(identifier, request.getPassword())
             );
 
@@ -140,7 +139,6 @@ public class AuthService {
         } catch (UnauthorizedException e) {
             throw e;
         } catch (Exception e) {
-            throw new UnauthorizedException("Invalid username/email or password");
             log.error("Authentication failed: {}", e.getMessage());
             throw new UnauthorizedException("Invalid username/email or password.");
         }
@@ -449,14 +447,9 @@ public class AuthService {
     private User getCurrentAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
-            throw new UnauthorizedException("Not authenticated");
             throw new UnauthorizedException("User session is not authenticated.");
         }
 
-        User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new UnauthorizedException("User not found"));
-
-        return userMapper.toDto(user);
         return userRepository.findById(principal.getId())
                 .orElseThrow(() -> new UnauthorizedException("Authenticated user record not found."));
     }

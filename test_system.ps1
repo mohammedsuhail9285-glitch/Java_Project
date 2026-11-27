@@ -106,10 +106,10 @@ Write-Host ("  Directional Trend Accuracy  : {0:N2}%" -f $modelAccuracy.metrics.
 Write-Host ("  95% CI Empirical Coverage   : {0:N2}%" -f $modelAccuracy.metrics.ci_95_empirical_coverage_percent) -ForegroundColor Green
 
 Write-Host "`n[10/10] MODULE 2 (SIH26006): Testing Data Export Endpoints (PDF, Excel, CSV)..." -ForegroundColor Yellow
-$csvResp = Invoke-WebRequest -Uri "http://localhost:8080/api/v1/freight/export/csv" -Headers $headers
+$csvResp = Invoke-WebRequest -Uri "http://localhost:8080/api/v1/freight/export/csv" -Headers $headers -UseBasicParsing
 Write-Host ("  CSV Export Status           : {0} (Bytes: {1})" -f $csvResp.StatusCode, $csvResp.RawContentLength) -ForegroundColor Green
 
-$excelResp = Invoke-WebRequest -Uri "http://localhost:8080/api/v1/freight/export/excel" -Headers $headers
+$excelResp = Invoke-WebRequest -Uri "http://localhost:8080/api/v1/freight/export/excel" -Headers $headers -UseBasicParsing
 Write-Host ("  Excel Export Status         : {0} (Bytes: {1})" -f $excelResp.StatusCode, $excelResp.RawContentLength) -ForegroundColor Green
 
 Write-Host "`n=================================================================" -ForegroundColor DarkCyan
